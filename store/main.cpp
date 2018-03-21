@@ -1,9 +1,11 @@
-#include <string>
+#include <cassert>
+#include <functional>
+#include <iostream>
 #include <memory>
 #include <map>
 #include <numeric>
-#include <iostream>
-#include <cassert>
+#include <vector>
+#include <string>
 
 namespace general {
 
@@ -129,11 +131,69 @@ public:
     }
 };
 
+class Category
+{
+public:
+    typedef std::shared_ptr<Category> shared_type;
+    
+protected:
+    Category (std::string const & name)
+        : _name(name)
+    {}
+
+    void addChild (shared_type const & child)
+    {
+        _children.push_back(child);
+    }
+    
+public:
+    static shared_type make (std::string const & name)
+    {
+        return shared_type(new Category(name));
+    }
+
+    static shared_type make (std::string const & name, shared_type const & parent)
+    {
+        auto result = shared_type(new Category(name));
+        result->_parent = parent;
+        parent->addChild(result);
+        return result;
+    }
+    
+    std::string to_string () const 
+    {
+        std::string result(_name);
+        
+        std::weak_ptr<Category> parent = _parent;
+                
+        while (parent.lock()) {
+            result = parent.lock()->_name + "->" + result;
+            parent = parent.lock()->_parent;
+        }
+        
+        return result;
+    }
+    
+private:
+    std::string                          _name;
+    std::weak_ptr<Category>              _parent;
+    std::vector<std::weak_ptr<Category>> _children;
+};
+
+template <>
+std::string to_string<> (Category const & c)
+{
+    return c.to_string();
+}
+
+template <>
+std::string to_string<> (Category::shared_type const & c)
+{
+    return c->to_string();
+}
+
 class Product
 {
-    std::string     _name;
-    general::price  _price;
-    
 public:
     Product (std::string const & name, double price)
             : _name(name)
@@ -158,6 +218,11 @@ public:
     virtual bool is_weighable () const = 0;
     virtual bool is_enumerable () const = 0;
     virtual general::cost cost () const = 0;
+
+private:    
+    std::string     _name;
+    general::price  _price;
+    std::vector<std::weak_ptr<Category>> _parents;
 };
 
 class Fruit : public Product, public Weighable
@@ -241,9 +306,11 @@ public:
     {
         return calculate(price(), quantity());
     }
-    
-    // TODO
-    // void makeCocktail ();
+
+    // TODO Implement
+    // Должно быть, по крайней мере, 2 ингридиента
+    template <typename T1, typename T2, typename ...Ts>
+    void makeCocktail (T1 const & , T2 const &, Ts const & ... other);
 };
 
 class Store
@@ -283,6 +350,12 @@ private:
 
 int main ()
 {
+    auto foodStuffs = Category::make("продукты питания");
+    auto dairyProduce = Category::make("молочные продукты", foodStuffs);
+    auto fruits = Category::make("фрукты", foodStuffs);
+    
+    std::cout << to_string(fruits) << std::endl;
+        
     // Добавим продукты в магазин
     Store store;
     store.addProduct(std::make_shared<Apple>(40.0f, 100.0f));
