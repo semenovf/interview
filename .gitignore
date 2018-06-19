@@ -1,5 +1,7 @@
 !.gitignore
+
 .settings/
+.build*/
 .kdev4/
 .idea/
 .project
@@ -9,9 +11,8 @@ debug/
 release/
 doxygen/
 nbproject/
-dist/
-build/
 .gbs/.cache/
+build*/
 
 Makefile
 Makefile.*
@@ -51,4 +52,4 @@ makefile.*
 moc_*.cpp
 qrc_*.cpp
 .sconsign.dblite
-.dep.inc
+Doxyget.err

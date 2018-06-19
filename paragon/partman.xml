@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<disks>
+    <disk name="Disk 0">
+        <volume name="Volume 0" />
+        <volume name="Volume 1" />
+        <volume name="Volume 2" />
+    </disk>
+
+    <disk name="Disk 1">
+        <volume name="Volume 0" />
+        <volume name="Volume 1" />
+        <volume name="Volume 2" />
+    </disk>
+
+    <disk name="Disk 2">
+        <volume name="Volume 0" />
+        <volume name="Volume 1" />
+        <volume name="Volume 2" />
+    </disk>
+</disks>
