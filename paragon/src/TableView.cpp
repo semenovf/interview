@@ -2,8 +2,6 @@
 #include <QStringList>
 #include "TableView.hpp"
 
-using ModelType = QStandardItemModel;
-
 TableView::TableView (QWidget * parent)
     : QTableView(parent)
 {

@@ -5,111 +5,111 @@
 #include <QDebug>
 #include "Model.hpp"
 
-struct TestVolumeModel : VolumeModel
-{
-    QDomElement elem;
-
-    TestVolumeModel (QDomElement e) : elem(e) {}
-
-    virtual QString name () const override { return QString("Volume-Name"); }
-    virtual VolumeLayoutEnum layout () const override { return VolumeLayoutEnum::Unknown; }
-    virtual VolumTypeEnum type () const override { return VolumTypeEnum::Unknown; }
-    virtual FileSystemEnum fileSystem () const override { return FileSystemEnum::Unknown; }
-    virtual VolumeStatusEnum status () const override { return VolumeStatusEnum::Unknown; }
-    virtual Capacity capacity () const override { return Capacity(0); }
-    virtual Capacity free () const override { return Capacity(0); }
-    virtual bool faultTolerance () const override { return false; }
-    virtual int overhead () const override { return 0; }
-};
-
-struct TestDiskModel : DiskModel
-{
-    QDomElement elem;
-
-    TestDiskModel (QDomElement e) : elem(e) {}
-
-    virtual int volumeCount () const override
-    {
-        QDomNodeList list = elem.elementsByTagName("volume");
-        return list.count();
-    }
-
-    virtual VolumeModel::SharedType volumeAt (int index) const override
-    {
-        QDomNodeList list = elem.elementsByTagName("volume");
-
-        if (index < 0 || index >= list.count())
-            return VolumeModel::SharedType();
-
-        QDomNode node = list.at(index);
-        auto result = QSharedPointer<TestVolumeModel>(new TestVolumeModel(node.toElement()));
-
-        return result.staticCast<VolumeModel>();
-    }
-
-    virtual QString name () const override { return QString("Disk-Name"); }
-    virtual DiskTypeEnum type () const override { return DiskTypeEnum::Unknown; }
-    virtual Capacity capacity () const override { return Capacity(0); }
-    virtual DiskStatusEnum status () const override { return DiskStatusEnum::Unknown; }
-};
-
-struct TestModel : Model
-{
-    QDomDocument doc;
-
-    virtual int diskCount () const override
-    {
-        QDomNodeList list = doc.elementsByTagName("disk");
-        return list.count();
-    }
-
-    virtual DiskModel::SharedType diskAt (int index) const override
-    {
-        QDomNodeList list = doc.elementsByTagName("disk");
-
-        if (index < 0 || index >= list.count())
-            return DiskModel::SharedType();
-
-        QDomNode node = list.at(index);
-        auto result = QSharedPointer<TestDiskModel>(new TestDiskModel(node.toElement()));
-
-        return result.staticCast<DiskModel>();
-    }
-};
-
-Model * requestModel ()
-{
-    QString appName = qApp->applicationName();
-    QString fileName = QString("./%1.xml").arg(appName);
-    QFile file(fileName);
-
-    if (!file.open(QIODevice::ReadOnly))
-        return nullptr;
-
-    auto pmodel = new TestModel;
-
-    QString errorMsg;
-    int errorLine = 0;
-    int errorColumn = 0;
-
-    if (!pmodel->doc.setContent(& file, & errorMsg, & errorLine, & errorColumn)) {
-        qWarning() << "ERROR: Failed to set content from XML: "
-                << errorMsg
-                << " at line " << errorLine
-                << " and column " << errorColumn;
-        delete pmodel;
-        pmodel = nullptr;
-    }
-
-    file.close();
-
-    return pmodel;
-}
-
-void releaseModel (Model * model)
-{
-    delete model;
-}
+// struct TestVolumeModel : VolumeModel
+// {
+//     QDomElement elem;
+//
+//     TestVolumeModel (QDomElement e) : elem(e) {}
+//
+//     virtual QString name () const override { return QString("Volume-Name"); }
+//     virtual VolumeLayoutEnum layout () const override { return VolumeLayoutEnum::Unknown; }
+//     virtual VolumTypeEnum type () const override { return VolumTypeEnum::Unknown; }
+//     virtual FileSystemEnum fileSystem () const override { return FileSystemEnum::Unknown; }
+//     virtual VolumeStatusEnum status () const override { return VolumeStatusEnum::Unknown; }
+//     virtual Capacity capacity () const override { return Capacity(0); }
+//     virtual Capacity free () const override { return Capacity(0); }
+//     virtual bool faultTolerance () const override { return false; }
+//     virtual int overhead () const override { return 0; }
+// };
+//
+// struct TestDiskModel : DiskModel
+// {
+//     QDomElement elem;
+//
+//     TestDiskModel (QDomElement e) : elem(e) {}
+//
+//     virtual int volumeCount () const override
+//     {
+//         QDomNodeList list = elem.elementsByTagName("volume");
+//         return list.count();
+//     }
+//
+//     virtual VolumeModel::SharedType volumeAt (int index) const override
+//     {
+//         QDomNodeList list = elem.elementsByTagName("volume");
+//
+//         if (index < 0 || index >= list.count())
+//             return VolumeModel::SharedType();
+//
+//         QDomNode node = list.at(index);
+//         auto result = QSharedPointer<TestVolumeModel>(new TestVolumeModel(node.toElement()));
+//
+//         return result.staticCast<VolumeModel>();
+//     }
+//
+//     virtual QString name () const override { return QString("Disk-Name"); }
+//     virtual DiskTypeEnum type () const override { return DiskTypeEnum::Unknown; }
+//     virtual Capacity capacity () const override { return Capacity(0); }
+//     virtual DiskStatusEnum status () const override { return DiskStatusEnum::Unknown; }
+// };
+//
+// struct TestModel : Model
+// {
+//     QDomDocument doc;
+//
+//     virtual int diskCount () const override
+//     {
+//         QDomNodeList list = doc.elementsByTagName("disk");
+//         return list.count();
+//     }
+//
+//     virtual DiskModel::SharedType diskAt (int index) const override
+//     {
+//         QDomNodeList list = doc.elementsByTagName("disk");
+//
+//         if (index < 0 || index >= list.count())
+//             return DiskModel::SharedType();
+//
+//         QDomNode node = list.at(index);
+//         auto result = QSharedPointer<TestDiskModel>(new TestDiskModel(node.toElement()));
+//
+//         return result.staticCast<DiskModel>();
+//     }
+// };
+//
+// Model * requestModel ()
+// {
+//     QString appName = qApp->applicationName();
+//     QString fileName = QString("./%1.xml").arg(appName);
+//     QFile file(fileName);
+//
+//     if (!file.open(QIODevice::ReadOnly))
+//         return nullptr;
+//
+//     auto pmodel = new TestModel;
+//
+//     QString errorMsg;
+//     int errorLine = 0;
+//     int errorColumn = 0;
+//
+//     if (!pmodel->doc.setContent(& file, & errorMsg, & errorLine, & errorColumn)) {
+//         qWarning() << "ERROR: Failed to set content from XML: "
+//                 << errorMsg
+//                 << " at line " << errorLine
+//                 << " and column " << errorColumn;
+//         delete pmodel;
+//         pmodel = nullptr;
+//     }
+//
+//     file.close();
+//
+//     return pmodel;
+// }
+//
+// void releaseModel (Model * model)
+// {
+//     delete model;
+// }
 
 // struct TestVolumeData
 // {

@@ -102,3 +102,90 @@ QString toString (Capacity const & cap)
     return QString("%1 %2").arg(cap.value).arg(CapacityUnitAbbrStrings[0]);
 
 }
+
+QString toString (bool value)
+{
+    return value ? QT_TR_NOOP("Yes") : QT_TR_NOOP("No");
+}
+
+template <>
+FileSystemEnum fromString<FileSystemEnum> (QString const & s)
+{
+    QString ls = s.toLower();
+    if (ls == QT_TR_NOOP("ext2"))  return FileSystemEnum::Ext2;
+    if (ls == QT_TR_NOOP("ext3"))  return FileSystemEnum::Ext3;
+    if (ls == QT_TR_NOOP("ext4"))  return FileSystemEnum::Ext4;
+    if (ls == QT_TR_NOOP("fat16")) return FileSystemEnum::FAT16;
+    if (ls == QT_TR_NOOP("fat32")) return FileSystemEnum::FAT32;
+    if (ls == QT_TR_NOOP("ntfs"))  return FileSystemEnum::NTFS;
+    return FileSystemEnum::Unknown;
+}
+
+template <>
+VolumTypeEnum fromString<VolumTypeEnum> (QString const & s)
+{
+    QString ls = s.toLower();
+    if (ls == QT_TR_NOOP("basic"))  return VolumTypeEnum::Basic;
+    return VolumTypeEnum::Unknown;
+}
+
+template <>
+VolumeLayoutEnum fromString<VolumeLayoutEnum> (QString const & s)
+{
+    QString ls = s.toLower();
+    if (ls == QT_TR_NOOP("simple"))  return VolumeLayoutEnum::Simple;
+    return VolumeLayoutEnum::Unknown;
+}
+
+template <>
+VolumeStatusEnum fromString<VolumeStatusEnum> (QString const & s)
+{
+    QString ls = s.toLower();
+    if (ls == QT_TR_NOOP("healthy"))  return VolumeStatusEnum::Healthy;
+    return VolumeStatusEnum::Unknown;
+}
+
+template <>
+DiskTypeEnum fromString<DiskTypeEnum> (QString const & s)
+{
+    QString ls = s.toLower();
+    if (ls == QT_TR_NOOP("basic"))   return DiskTypeEnum::Basic;
+    if (ls == QT_TR_NOOP("cd_rom"))  return DiskTypeEnum::CD_ROM;
+    if (ls == QT_TR_NOOP("cd-rom"))  return DiskTypeEnum::CD_ROM;
+    if (ls == QT_TR_NOOP("dvd_rom")) return DiskTypeEnum::DVD_ROM;
+    if (ls == QT_TR_NOOP("dvd-rom")) return DiskTypeEnum::DVD_ROM;
+    return DiskTypeEnum::Unknown;
+}
+
+template <>
+DiskStatusEnum fromString<DiskStatusEnum> (QString const & s)
+{
+    QString ls = s.toLower();
+    if (ls == QT_TR_NOOP("online"))  return DiskStatusEnum::Online;
+    if (ls == QT_TR_NOOP("offline")) return DiskStatusEnum::Offline;
+    return DiskStatusEnum::Unknown;
+}
+
+Capacity DiskModel::free () const
+{
+    int count = volumeCount();
+    Capacity result(0);
+
+    for (int i = 0; i < count; i++) {
+        auto volumeModel = volumeAt(i);
+        result = Capacity(qMax(result.value, volumeModel->free().value));
+    }
+    return result;
+}
+
+Capacity Model::maxCapacity () const
+{
+    int count = diskCount();
+    Capacity result(0);
+
+    for (int i = 0; i < count; i++) {
+        auto diskModel = diskAt(i);
+        result = Capacity(qMax(result.value, diskModel->capacity().value));
+    }
+    return result;
+}

@@ -1,8 +1,12 @@
 #pragma once
 #include "TableView.hpp"
 
+class Model;
+
 class DiskListView : public TableView
 {
+    Model * _model;
+
 public:
-    DiskListView (QWidget * parent = 0);
+    DiskListView (Model *, QWidget * parent = 0);
 };

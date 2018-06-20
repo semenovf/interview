@@ -60,9 +60,20 @@ QString toString (VolumeStatusEnum const & value);
 QString toString (DiskTypeEnum const & value);
 QString toString (DiskStatusEnum const & value);
 QString toString (Capacity const & value);
+QString toString (bool value);
+
+template <typename EnumT>
+EnumT fromString (QString const & s);
+
+struct Model;
+struct DiskModel;
 
 struct VolumeModel
 {
+    DiskModel * parentDiskModel;
+
+    VolumeModel (DiskModel * parent) : parentDiskModel(parent) {}
+
     virtual QString name () const = 0;
     virtual VolumeLayoutEnum layout () const = 0;
     virtual VolumTypeEnum type () const = 0;
@@ -72,26 +83,36 @@ struct VolumeModel
     virtual Capacity free () const = 0;
     virtual bool faultTolerance () const = 0;
     virtual int overhead () const = 0;
-
-    using SharedType = QSharedPointer<VolumeModel>;
 };
 
 struct DiskModel
 {
+    Model * parentModel;
+
+    DiskModel (Model * parent) : parentModel(parent) {}
+
     virtual int volumeCount () const = 0;
-    virtual VolumeModel::SharedType volumeAt (int index) const = 0;
+    virtual VolumeModel * volumeAt (int index) const = 0;
     virtual QString name () const = 0;
     virtual DiskTypeEnum type () const = 0;
     virtual Capacity capacity () const = 0;
     virtual DiskStatusEnum status () const = 0;
 
-    using SharedType = QSharedPointer<DiskModel>;
+    /**
+     * @return Free capacity
+     */
+    Capacity free () const;
 };
 
 struct Model
 {
     virtual int diskCount () const = 0;
-    virtual DiskModel::SharedType diskAt (int index) const = 0;
+    virtual DiskModel * diskAt (int index) const = 0;
+
+    /**
+     * @return Capacity of the lagest disk
+     */
+    Capacity maxCapacity () const;
 };
 
 Model * requestModel ();

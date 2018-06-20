@@ -13,13 +13,16 @@ find_package(Qt4 REQUIRED QtGui QtXml)
 
 set(SOURCES
     src/main.cpp
+    src/DiskListView.cpp
+    src/DiskSummaryWidget.cpp
+    src/GraphicalView.cpp
+    src/GraphicalViewItem.cpp
     src/MainWindow.cpp
     src/Model.cpp
     src/TableView.cpp
-    src/GraphicalView.cpp
-    src/DiskListView.cpp
+    src/TestModel.cpp
     src/VolumeListView.cpp
-    src/TestModel.cpp)
+    src/VolumeSummaryWidget.cpp)
 
 add_executable(partman ${SOURCES})
 target_link_libraries(partman Qt4::QtGui Qt4::QtXml)

@@ -1,18 +1,28 @@
 #include <QLabel>
+#include <QVBoxLayout>
 #include "Model.hpp"
+#include "GraphicalViewItem.hpp"
 #include "GraphicalView.hpp"
 
-DiskSummaryWidget::DiskSummaryWidget (DiskModel & model, QWidget * parent)
-    : QPushButton(parent)
-    , _model(model)
-{
-    auto nameLabel = new QLabel(_model.name());
-    auto typeLabel = new QLabel(toString(_model.type()));
-    auto capacityLabel = new QLabel(toString(_model.capacity()));
-}
-
-GraphicalView::GraphicalView (QWidget * parent)
+GraphicalView::GraphicalView (Model * model, QWidget * parent)
     : QWidget(parent)
+    , _pmodel(model)
 {
+    auto layout = new QVBoxLayout;
+    layout->setContentsMargins(0,0,0,0);
+
+    auto count = _pmodel->diskCount();
+
+    for (int i = 0; i < count; i++) {
+        auto pitem = new GraphicalViewItem(_pmodel->diskAt(i), _pmodel->maxCapacity(), this);
+        _items.append(pitem);
+        layout->addWidget(pitem);
+    }
+
+    layout->addStretch(100);
+// void
+// addSpacerItem ( QSpacerItem * spacerItem )
+
+    setLayout(layout);
 
 }
