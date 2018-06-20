@@ -3,35 +3,44 @@
 #include "VolumeSummaryWidget.hpp"
 #include "GraphicalViewItem.hpp"
 
-GraphicalViewItem::GraphicalViewItem (DiskModel * pmodel
+GraphicalViewItem::GraphicalViewItem (DiskModel * diskModel
             , Capacity const & maxCapacity
             , QWidget * parent)
     : QWidget(parent)
-    , _pdiskModel(pmodel)
+    , _diskModel(diskModel)
     , _maxCapacity(maxCapacity)
 {
     auto layout = new QHBoxLayout;
     layout->setContentsMargins(0,0,0,0);
 
-    _pdisk = new DiskSummaryWidget(pmodel, this);
+    _disk = new DiskSummaryWidget(_diskModel, this);
 
-    layout->addWidget(_pdisk);
+    layout->addWidget(_disk);
 
-    auto count = _pdiskModel->volumeCount();
+    auto count = _diskModel->volumeCount();
 
     for (int i = 0; i < count; i++) {
-        auto pvolume = new VolumeSummaryWidget(_pdiskModel->volumeAt(i), this);
-        _volumes.append(pvolume);
-        layout->addWidget(pvolume);
+        auto volume = new VolumeSummaryWidget(_diskModel->volumeAt(i), this);
+        _volumes.append(volume);
+        layout->addWidget(volume);
     }
 
     setLayout(layout);
 }
 
-void GraphicalViewItem::setActive (bool value)
+void GraphicalViewItem::setActiveDisk (bool value)
 {
-    _pdisk->setActive(value);
-
-    for (auto volume: _volumes)
-        volume->setActive(value);
+    _disk->setActive(value);
 }
+
+void GraphicalViewItem::setActiveVolume (int volumeIndex, bool value)
+{
+}
+
+// void GraphicalViewItem::setActive (bool value)
+// {
+//     _pdisk->setActive(value);
+//
+//     for (auto volume: _volumes)
+//         volume->setActive(value);
+// }

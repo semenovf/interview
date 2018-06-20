@@ -6,7 +6,8 @@ TableView::TableView (QWidget * parent)
     : QTableView(parent)
 {
     auto model = new ModelType;
-    this->setModel(model);
+    setModel(model);
+    setSelectionMode(SingleSelection);
 }
 
 void TableView::setHorizontalHeaderLabels (QStringList const & labels)

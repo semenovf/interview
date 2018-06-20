@@ -5,6 +5,78 @@
 #include <QDebug>
 #include "Model.hpp"
 
+struct TestVolumeModel : VolumeModel
+{
+    QString volumeName;
+
+    TestVolumeModel (int index, QString const & name, DiskModel * parent)
+            : VolumeModel(index, parent)
+            , volumeName(name)
+    {}
+
+    virtual QString name () const override { return volumeName; }
+    virtual VolumeLayoutEnum layout () const override { return VolumeLayoutEnum::Unknown; }
+    virtual VolumTypeEnum type () const override { return VolumTypeEnum::Unknown; }
+    virtual FileSystemEnum fileSystem () const override { return FileSystemEnum::NTFS; }
+    virtual VolumeStatusEnum status () const override { return VolumeStatusEnum::Healthy; }
+    virtual Capacity capacity () const override { return Capacity(1000); }
+    virtual Capacity free () const override { return Capacity(500); }
+    virtual bool faultTolerance () const override { return false; }
+    virtual int overhead () const override { return 0; }
+};
+
+struct TestDiskModel : DiskModel
+{
+    VolumeModel * volumes[2];
+    QString diskName;
+
+    TestDiskModel (int index, QString const & name, Model * parent)
+            : DiskModel(index, parent)
+            , diskName(name)
+    {}
+
+    virtual int volumeCount () const override { return 2; }
+    virtual VolumeModel * volumeAt (int index) const override { return volumes[index]; }
+    virtual QString name () const override { return diskName; }
+    virtual DiskTypeEnum type () const override { return DiskTypeEnum::Basic; }
+    virtual Capacity capacity () const override { return Capacity(2000); }
+    virtual DiskStatusEnum status () const override { return DiskStatusEnum::Online; }
+};
+
+struct TestModel : Model
+{
+    DiskModel * disks[2];
+
+    virtual int diskCount () const override { return 2; }
+    virtual DiskModel * diskAt (int index) const override { return disks[index]; }
+};
+
+static TestModel model;
+static TestDiskModel diskModel0(0, "Disk 0", & model);
+static TestVolumeModel volumeModel0_0(0, "C:", & diskModel0);
+static TestVolumeModel volumeModel0_1(1, "D:", & diskModel0);
+static TestDiskModel diskModel1(1, "CD-ROM 0", & model);
+static TestVolumeModel volumeModel1_0(0, "E:", & diskModel1);
+static TestVolumeModel volumeModel1_1(1, "F:", & diskModel1);
+
+Model * requestModel ()
+{
+    diskModel0.volumes[0] = & volumeModel0_0;
+    diskModel0.volumes[1] = & volumeModel0_1;
+
+    diskModel1.volumes[0] = & volumeModel1_0;
+    diskModel1.volumes[1] = & volumeModel1_1;
+
+    model.disks[0] = & diskModel0;
+    model.disks[1] = & diskModel1;
+
+    return & model;
+}
+
+void releaseModel (Model *)
+{}
+
+
 // struct TestVolumeModel : VolumeModel
 // {
 //     QDomElement elem;

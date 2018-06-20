@@ -55,10 +55,8 @@ private:
     Q_SLOT void showHideBottom ();
     Q_SLOT void updateViewMenu ();
 
-    Q_SIGNAL void emitDiskSelected (QString const & diskName);
-    Q_SIGNAL void emitVolumeSelected (QString const & diskName, QString const & volumeName);
-
-    Q_SLOT void onVolumeSelected (QString const & diskName, QString const & volumeName);
+    Q_SIGNAL void emitDiskSelected (int diskIndex);
+    Q_SIGNAL void emitVolumeSelected (int diskIndex, int volumeIndex);
 
 private:
     void setTopWidget (QWidget * w);

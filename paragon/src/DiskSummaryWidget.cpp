@@ -1,28 +1,19 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QFontMetrics>
+#include <QMouseEvent>
 #include "Model.hpp"
 #include "DiskSummaryWidget.hpp"
 
-DiskSummaryWidget::DiskSummaryWidget (DiskModel * pmodel, QWidget * parent)
+DiskSummaryWidget::DiskSummaryWidget (DiskModel * diskModel, QWidget * parent)
     : QFrame(parent)
+    , _diskModel(diskModel)
     , _active(false)
-    , _pmodel(pmodel)
 {
-//     auto nameLabel = new QLabel(_model.name());
-//     auto typeLabel = new QLabel(toString(_model.type()));
-//     auto capacityLabel = new QLabel(toString(_model.capacity()));
-
-    // Only for test
-    auto name     = QString("Disk 0");
-    auto type     = fromString<DiskTypeEnum>(tr("Basic"));
-    auto capacity = Capacity(100000);
-    auto status   = fromString<DiskStatusEnum>(tr("Online"));
-
-    auto nameLabel     = new QLabel(name);
-    auto typeLabel     = new QLabel(toString(type));
-    auto capacityLabel = new QLabel(toString(capacity));
-    auto statusLabel   = new QLabel(toString(status));
+    auto nameLabel     = new QLabel(_diskModel->name());
+    auto typeLabel     = new QLabel(toString(_diskModel->type()));
+    auto capacityLabel = new QLabel(toString(_diskModel->capacity()));
+    auto statusLabel   = new QLabel(toString(_diskModel->status()));
 
     // Set Bold font for disk name
     QFont nameFont = nameLabel->font();
@@ -63,4 +54,10 @@ void DiskSummaryWidget::toggle ()
 {
     _active = !_active;
     updateFrame();
+}
+
+void DiskSummaryWidget::mousePressEvent (QMouseEvent * event)
+{
+    setActive(true);
+    event->accept();
 }

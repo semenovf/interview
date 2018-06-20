@@ -62,9 +62,6 @@ MainWindow::MainWindow (Model * model)
     initMenus();
     initStatusBar();
     restoreSettings();
-
-    connect(this, SIGNAL(volumeSelected (QString const &, QString const &))
-            , SLOT(onVolumeSelected (QString const &, QString const &)));
 }
 
 void MainWindow::closeEvent (QCloseEvent * event)
@@ -177,41 +174,56 @@ void MainWindow::onExit ()
 
 void MainWindow::setDiskListAtTop ()
 {
-    setTopWidget(new DiskListView(_model, _topWidget));
+    auto view = new DiskListView(_model, _topWidget);
+    connect(view, SIGNAL(emitDiskSelected(int)), this, SIGNAL(emitDiskSelected(int)));
+    connect(this, SIGNAL(emitDiskSelected(int)), view, SLOT(onDiskSelected(int)));
+    setTopWidget(view);
+}
+
+void MainWindow::setDiskListAtBottom ()
+{
+    auto view = new DiskListView(_model, _bottomWidget);
+    connect(view, SIGNAL(emitDiskSelected(int)), this, SIGNAL(emitDiskSelected(int)));
+    connect(this, SIGNAL(emitDiskSelected(int)), view, SLOT(onDiskSelected(int)));
+    setBottomWidget(view);
 }
 
 void MainWindow::setVolumeListAtTop ()
 {
     auto view = new VolumeListView(_model, _topWidget);
-    connect(view
-            , SIGNAL(emitSelected(QString const &, QString const &))
-            , this
-            , SIGNAL(emitVolumeSelected(QString const &, QString const &)));
-    connect(this
-            , SIGNAL(emitVolumeSelected(QString const &, QString const &))
-            , this
-            , SIGNAL(onVolumeSelected(QString const &, QString const &)));
+    connect(view, SIGNAL(emitVolumeSelected(int, int)), this, SIGNAL(emitVolumeSelected(int, int)));
+    connect(this, SIGNAL(emitVolumeSelected(int, int)), view, SLOT(onVolumeSelected(int, int)));
     setTopWidget(view);
-}
-
-void MainWindow::setGraphicalViewAtTop ()
-{
-    setTopWidget(new GraphicalView(_model, _topWidget));
-}
-
-void MainWindow::setDiskListAtBottom ()
-{
-    setBottomWidget(new DiskListView(_model, _bottomWidget));
 }
 
 void MainWindow::setVolumeListAtBottom ()
 {
-    setBottomWidget(new VolumeListView(_model, _bottomWidget));
+    auto view = new VolumeListView(_model, _bottomWidget);
+    connect(view, SIGNAL(emitVolumeSelected(int, int)), this, SIGNAL(emitVolumeSelected(int, int)));
+    connect(this, SIGNAL(emitVolumeSelected(int, int)), view, SLOT(onVolumeSelected(int, int)));
+    setBottomWidget(view);
+}
+
+void MainWindow::setGraphicalViewAtTop ()
+{
+    auto view = new GraphicalView(_model, _topWidget);
+    connect(view, SIGNAL(emitDiskSelected(int)), this, SIGNAL(emitDiskSelected(int)));
+    connect(this, SIGNAL(emitDiskSelected(int)), view, SLOT(onDiskSelected(int)));
+    connect(view, SIGNAL(emitVolumeSelected(int, int)), this, SIGNAL(emitVolumeSelected(int, int)));
+    connect(this, SIGNAL(emitVolumeSelected(int, int)), view, SLOT(onVolumeSelected(int, int)));
+    setTopWidget(view);
+
+    setTopWidget(new GraphicalView(_model, _topWidget));
 }
 
 void MainWindow::setGraphicalViewAtBottom ()
 {
-    setBottomWidget(new GraphicalView(_model, _bottomWidget));
+    auto view = new GraphicalView(_model, _bottomWidget);
+    connect(view, SIGNAL(emitDiskSelected(int)), this, SIGNAL(emitDiskSelected(int)));
+    connect(this, SIGNAL(emitDiskSelected(int)), view, SLOT(onDiskSelected(int)));
+    connect(view, SIGNAL(emitVolumeSelected(int, int)), this, SIGNAL(emitVolumeSelected(int, int)));
+    connect(this, SIGNAL(emitVolumeSelected(int, int)), view, SLOT(onVolumeSelected(int, int)));
+    setBottomWidget(view);
 }
 
 void MainWindow::showHideBottom ()
@@ -221,10 +233,4 @@ void MainWindow::showHideBottom ()
     else
         _bottomWidget->setVisible(true);
 
-}
-
-void MainWindow::onVolumeSelected (QString const & diskName, QString const & volumeName)
-{
-    qDebug() << diskName;
-    qDebug() << volumeName;
 }

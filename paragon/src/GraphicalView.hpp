@@ -17,6 +17,16 @@ class GraphicalView : public QWidget
 
 public:
     GraphicalView (Model *, QWidget * parent = 0);
+
+    Q_SIGNAL void emitDiskSelected (int diskIndex);
+    Q_SIGNAL void emitVolumeSelected (int diskIndex, int volumeIndex);
+    Q_SLOT void onDiskSelected (int diskIndex);
+    Q_SLOT void onVolumeSelected (int diskIndex, int volumeIndex);
+
+private:
+    //Q_SLOT onDiskSelected ();
+
+
 };
 
 

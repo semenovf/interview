@@ -3,8 +3,8 @@
 #include "Model.hpp"
 #include "VolumeListView.hpp"
 
-static int const DiskNameRole = Qt::UserRole + 1;
-static int const VolumeNameRole = Qt::UserRole + 2;
+static int const DiskIndexRole = Qt::UserRole + 1;
+static int const VolumeIndexRole = Qt::UserRole + 2;
 
 VolumeListView::VolumeListView (Model * model, QWidget * parent)
     : TableView(parent)
@@ -51,8 +51,8 @@ VolumeListView::VolumeListView (Model * model, QWidget * parent)
 
             nameItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 
-            nameItem->setData(diskModel->name(), DiskNameRole);
-            nameItem->setData(volumeModel->name(), VolumeNameRole);
+            nameItem->setData(i, DiskIndexRole);
+            nameItem->setData(j, VolumeIndexRole);
 
             layoutItem->setFlags(defaultFlags);
             typeItem->setFlags(defaultFlags);
@@ -83,7 +83,35 @@ VolumeListView::VolumeListView (Model * model, QWidget * parent)
         }
     }
 
-    connect(this, SIGNAL(pressed(QModelIndex const &)), SLOT(onSelected(QModelIndex const &)));
+    connect(this, SIGNAL(activated(QModelIndex const &)), SLOT(onSelected(QModelIndex const &)));
+    connect(this, SIGNAL(clicked(QModelIndex const &)), SLOT(onSelected(QModelIndex const &)));
+}
+
+QModelIndex VolumeListView::getItemIndex (int diskIndex, int volumeIndex)
+{
+    auto model = static_cast<ModelType *>(this->model());
+    int rowCount = model->rowCount();
+
+    // Check first column in all rows to find specified volume
+    for (int i = 0; i < rowCount; i++) {
+        auto item = model->item(i, 0);
+        int di = item->data(DiskIndexRole).toInt();
+        int vi = item->data(VolumeIndexRole).toInt();
+
+        if (di == diskIndex && vi == volumeIndex)
+            return model->index(i, 0);
+    }
+
+    return QModelIndex();
+}
+
+void VolumeListView::onVolumeSelected (int diskIndex, int volumeIndex)
+{
+    auto index = getItemIndex(diskIndex, volumeIndex);
+
+    if (index.isValid()) {
+        setCurrentIndex(index);
+    }
 }
 
 void VolumeListView::onSelected (QModelIndex const & index)
@@ -91,8 +119,8 @@ void VolumeListView::onSelected (QModelIndex const & index)
     if (index.isValid()) {
         auto model = static_cast<ModelType *>(this->model());
         auto item = model->itemFromIndex(index);
-        QString diskName = item->data(DiskNameRole).toString();
-        QString volumeName = item->data(VolumeNameRole).toString();
-        emitSelected(diskName, volumeName);
+        int diskIndex = item->data(DiskIndexRole).toInt();
+        int volumeIndex = item->data(VolumeIndexRole).toInt();
+        emitVolumeSelected(diskIndex, volumeIndex);
     }
 }

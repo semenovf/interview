@@ -2,12 +2,13 @@
 #include <QVBoxLayout>
 #include <QFontMetrics>
 #include <QPalette>
+#include <QMouseEvent>
 #include "Model.hpp"
 #include "VolumeSummaryWidget.hpp"
 
-VolumeSummaryWidget::VolumeSummaryWidget (VolumeModel * pmodel, QWidget * parent)
+VolumeSummaryWidget::VolumeSummaryWidget (VolumeModel * volumeModel, QWidget * parent)
     : QFrame(parent)
-    , _pmodel(pmodel)
+    , _volumeModel(volumeModel)
     , _active(false)
 {
     QFontMetrics fm(font());
@@ -15,21 +16,38 @@ VolumeSummaryWidget::VolumeSummaryWidget (VolumeModel * pmodel, QWidget * parent
     setContentsMargins(0,0,0,0);
 
     // Only for test
-    QString name              = _pmodel->name();
-    Capacity capacity         = _pmodel->capacity();
-    FileSystemEnum fileSystem = _pmodel->fileSystem();
-    VolumeStatusEnum status   = _pmodel->status();
+    QString name              = _volumeModel->name();
+    Capacity capacity         = _volumeModel->capacity();
+    FileSystemEnum fileSystem = _volumeModel->fileSystem();
+    VolumeStatusEnum status   = _volumeModel->status();
 
     auto captionLabel  = new QLabel();
     auto nameLabel     = new QLabel(name);
     auto compaundLabel = new QLabel(toString(capacity) + " " + toString(fileSystem));
     auto statusLabel   = new QLabel(toString(status));
 
+    QPalette thisPalette = this->palette();
+
     QPalette captionPalette;
-    captionPalette.setColor(QPalette::Background, Qt::blue);
+    captionPalette.setColor(QPalette::Window, Qt::blue);
     captionLabel->setAutoFillBackground(true);
     captionLabel->setPalette(captionPalette);
     captionLabel->setFixedHeight(fm.height());
+
+    // Set backround color for labels as for parent widget
+    QPalette labelPalette;
+    labelPalette.setColor(QPalette::Window, thisPalette.color(QPalette::Window));
+    nameLabel->setPalette(labelPalette);
+    nameLabel->setAutoFillBackground(true);
+    compaundLabel->setPalette(labelPalette);
+    compaundLabel->setAutoFillBackground(true);
+    statusLabel->setPalette(labelPalette);
+    statusLabel->setAutoFillBackground(true);
+
+    // Set labels fix-sized
+    nameLabel->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+    compaundLabel->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+    statusLabel->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
     // Set Bold font for disk name
     QFont nameFont = nameLabel->font();
@@ -67,6 +85,25 @@ void VolumeSummaryWidget::updateFrame ()
 
 void VolumeSummaryWidget::updateBackground ()
 {
+    QPalette palette = this->palette();
+    palette.setColor(QPalette::Window, Qt::white);
+    QBrush brush = palette.brush(QPalette::Window);
+    QColor color;
+
+    if (_active) {
+        color = Qt::white;
+        brush.setColor(Qt::black);
+        brush.setStyle(Qt::BDiagPattern);
+    } else {
+        color = Qt::white;
+        brush.setColor(Qt::black);
+        brush.setStyle(Qt::SolidPattern);
+    }
+
+    palette.setColor(QPalette::Window, color);
+    palette.setBrush(QPalette::Window, brush);
+    setAutoFillBackground(true);
+    setPalette(palette);
 }
 
 void VolumeSummaryWidget::setActive (bool value)
@@ -81,4 +118,10 @@ void VolumeSummaryWidget::toggle ()
     _active = !_active;
     updateFrame();
     updateBackground();
+}
+
+void VolumeSummaryWidget::mousePressEvent (QMouseEvent * event)
+{
+    setActive(true);
+    event->accept();
 }

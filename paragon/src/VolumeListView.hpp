@@ -12,11 +12,11 @@ class VolumeListView : public TableView
 public:
     VolumeListView (Model *, QWidget * parent = 0);
 
-public:
-    Q_SLOT void onVolumeSelected (QString const & diskName, QString const & volumeName);
-    Q_SIGNAL void emitSelected (QString const & diskName, QString const & volumeName);
+    Q_SLOT void onVolumeSelected (int diskIndex, int volumeIndex);
+    Q_SIGNAL void emitVolumeSelected (int diskIndex, int volumeIndex);
 
 private:
     Q_SLOT void onSelected (QModelIndex const &);
 
+    QModelIndex getItemIndex (int diskIndex, int volumeIndex);
 };

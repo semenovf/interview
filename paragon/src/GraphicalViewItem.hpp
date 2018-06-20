@@ -9,15 +9,18 @@ class GraphicalViewItem : public QWidget
 {
     Q_OBJECT
 
-    DiskModel *                  _pdiskModel;
+    DiskModel *                  _diskModel;
     Capacity                     _maxCapacity;
-    DiskSummaryWidget *          _pdisk;
+    DiskSummaryWidget *          _disk;
     QList<VolumeSummaryWidget *> _volumes;
 
 public:
-    GraphicalViewItem (DiskModel *, Capacity const & maxCapacity, QWidget * parent = 0);
+    GraphicalViewItem (DiskModel * diskModel
+            , Capacity const & maxCapacity
+            , QWidget * parent = 0);
 
 public:
-    Q_SLOT void setActive (bool);
+    Q_SLOT void setActiveDisk (bool);
+    Q_SLOT void setActiveVolume (int volumeIndex, bool);
 };
 

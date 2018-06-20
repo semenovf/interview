@@ -4,6 +4,8 @@
 #include "GraphicalViewItem.hpp"
 #include "GraphicalView.hpp"
 
+#include <QDebug>
+
 GraphicalView::GraphicalView (Model * model, QWidget * parent)
     : QWidget(parent)
     , _pmodel(model)
@@ -24,5 +26,15 @@ GraphicalView::GraphicalView (Model * model, QWidget * parent)
 // addSpacerItem ( QSpacerItem * spacerItem )
 
     setLayout(layout);
-
 }
+
+void GraphicalView::onDiskSelected (int diskIndex)
+{
+    qDebug() << "Disk selected: " << diskIndex;
+}
+
+void GraphicalView::onVolumeSelected (int diskIndex, int volumeIndex)
+{
+    qDebug() << "Volume selected: " << diskIndex << ":" << volumeIndex;
+}
+

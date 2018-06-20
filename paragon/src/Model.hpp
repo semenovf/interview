@@ -71,8 +71,14 @@ struct DiskModel;
 struct VolumeModel
 {
     DiskModel * parentDiskModel;
+    int volumeIndex;
 
-    VolumeModel (DiskModel * parent) : parentDiskModel(parent) {}
+    VolumeModel (int index, DiskModel * parent)
+        : parentDiskModel(parent)
+        , volumeIndex(index) {}
+
+    int index () const { return volumeIndex; }
+    int diskIndex () const;
 
     virtual QString name () const = 0;
     virtual VolumeLayoutEnum layout () const = 0;
@@ -88,8 +94,14 @@ struct VolumeModel
 struct DiskModel
 {
     Model * parentModel;
+    int diskIndex;
 
-    DiskModel (Model * parent) : parentModel(parent) {}
+    DiskModel (int index, Model * parent)
+            : parentModel(parent)
+            , diskIndex(index)
+    {}
+
+    int index () const { return diskIndex; }
 
     virtual int volumeCount () const = 0;
     virtual VolumeModel * volumeAt (int index) const = 0;
@@ -114,6 +126,11 @@ struct Model
      */
     Capacity maxCapacity () const;
 };
+
+inline int VolumeModel::diskIndex () const
+{
+    return parentDiskModel->index();
+}
 
 Model * requestModel ();
 void releaseModel (Model * model);
