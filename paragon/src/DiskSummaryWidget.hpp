@@ -19,9 +19,8 @@ class DiskSummaryWidget : public QFrame
 public:
     DiskSummaryWidget (DiskModel * diskModel, QWidget * parent = 0);
 
-    Q_SIGNAL void emitDiskSelected (int diskIndex);
-    Q_SLOT void onDiskSelected (int diskIndex);
-    //Q_SLOT void toggle ();
+    Q_SIGNAL void emitEntitySelected (int diskIndex, int volumeIndex);
+    Q_SLOT void onEntitySelected (int diskIndex, int volumeIndex);
 
 protected:
     virtual void mousePressEvent (QMouseEvent * event) override;

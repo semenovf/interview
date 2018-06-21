@@ -115,11 +115,11 @@ void VolumeSummaryWidget::setActive (bool value)
 void VolumeSummaryWidget::mousePressEvent (QMouseEvent * event)
 {
     setActive(true);
-    emitVolumeSelected(_volumeModel->diskIndex(), _volumeModel->index());
+    emitEntitySelected(_volumeModel->diskIndex(), _volumeModel->index());
     event->accept();
 }
 
-void VolumeSummaryWidget::onVolumeSelected (int diskIndex, int volumeIndex)
+void VolumeSummaryWidget::onEntitySelected (int diskIndex, int volumeIndex)
 {
     if (diskIndex == _volumeModel->diskIndex()
             && volumeIndex == _volumeModel->index())

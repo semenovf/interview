@@ -12,9 +12,8 @@ class DiskListView : public TableView
 public:
     DiskListView (Model *, QWidget * parent = 0);
 
-    Q_SIGNAL void emitDiskSelected (int);
-    Q_SLOT void onDiskSelected (int);
-    Q_SLOT void onVolumeSelected (int diskIndex, int volumeIndex);
+    Q_SIGNAL void emitEntitySelected (int diskIndex, int volumeIndex);
+    Q_SLOT void onEntitySelected (int diskIndex, int volumeIndex);
 
 private:
     Q_SLOT void onSelected (QModelIndex const &);

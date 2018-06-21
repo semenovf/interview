@@ -16,9 +16,7 @@ class GraphicalViewItem : public QWidget
 public:
     GraphicalViewItem (DiskModel * diskModel, QWidget * parent = 0);
 
-    Q_SIGNAL void emitDiskSelected (int diskIndex);
-    Q_SIGNAL void emitVolumeSelected (int diskIndex, int volumeIndex);
-    Q_SLOT void onDiskSelected (int diskIndex);
-    Q_SLOT void onVolumeSelected (int diskIndex, int volumeIndex);
+    Q_SIGNAL void emitEntitySelected (int diskIndex, int volumeIndex);
+    Q_SLOT void onEntitySelected (int diskIndex, int volumeIndex);
 };
 

@@ -12,7 +12,7 @@ GraphicalViewItem::GraphicalViewItem (DiskModel * diskModel
     layout->setContentsMargins(0,0,0,0);
 
     _disk = new DiskSummaryWidget(_diskModel, this);
-    connect(_disk, SIGNAL(emitDiskSelected(int)), this, SIGNAL(emitDiskSelected(int)));
+    connect(_disk, SIGNAL(emitEntitySelected(int, int)), this, SIGNAL(emitEntitySelected(int, int)));
 
     layout->addWidget(_disk);
 
@@ -31,7 +31,7 @@ GraphicalViewItem::GraphicalViewItem (DiskModel * diskModel
         layout->addWidget(volume, stretch);
         tailStretch -= stretch;
 
-        connect(volume, SIGNAL(emitVolumeSelected(int, int)), this, SIGNAL(emitVolumeSelected(int, int)));
+        connect(volume, SIGNAL(emitEntitySelected(int, int)), this, SIGNAL(emitEntitySelected(int, int)));
     }
 
     if (tailStretch > 0)
@@ -40,15 +40,11 @@ GraphicalViewItem::GraphicalViewItem (DiskModel * diskModel
     setLayout(layout);
 }
 
-void GraphicalViewItem::onDiskSelected (int diskIndex)
+void GraphicalViewItem::onEntitySelected (int diskIndex, int volumeIndex)
 {
-    _disk->onDiskSelected(diskIndex);
-}
+    _disk->onEntitySelected(diskIndex, volumeIndex);
 
-void GraphicalViewItem::onVolumeSelected (int diskIndex, int volumeIndex)
-{
-    for (auto volume: _volumes) {
-        volume->onVolumeSelected(diskIndex, volumeIndex);
-    }
+    for (auto volume: _volumes)
+        volume->onEntitySelected(diskIndex, volumeIndex);
 }
 

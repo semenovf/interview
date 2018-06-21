@@ -1,5 +1,6 @@
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QScrollArea>
 #include "Model.hpp"
 #include "GraphicalViewItem.hpp"
 #include "GraphicalView.hpp"
@@ -7,41 +8,34 @@
 #include <QDebug>
 
 GraphicalView::GraphicalView (Model * model, QWidget * parent)
-    : QWidget(parent)
-    , _pmodel(model)
+    : QScrollArea(parent)
+    , _model(model)
 {
-    auto layout = new QVBoxLayout;
-    layout->setContentsMargins(0,0,0,0);
+    auto scrollAreaWidget = new QWidget;
+    this->setWidgetResizable(true);
+    this->setWidget(scrollAreaWidget);
+    //this->setBackgroundRole(QPalette::Dark);
 
-    auto count = _pmodel->diskCount();
+    auto scrollAreaLayout = new QVBoxLayout;
+    scrollAreaLayout->setContentsMargins(0,0,0,0);
+    scrollAreaWidget->setLayout(scrollAreaLayout);
+
+    auto count = _model->diskCount();
 
     for (int i = 0; i < count; i++) {
-        auto item = new GraphicalViewItem(_pmodel->diskAt(i), this);
+        auto item = new GraphicalViewItem(_model->diskAt(i), scrollAreaWidget);
         _items.append(item);
-        layout->addWidget(item);
+        scrollAreaLayout->addWidget(item);
 
-        connect(item, SIGNAL(emitDiskSelected(int)), this, SIGNAL(emitDiskSelected(int)));
-        connect(item, SIGNAL(emitVolumeSelected(int, int)), this, SIGNAL(emitVolumeSelected(int, int)));
+        connect(item, SIGNAL(emitEntitySelected(int, int)), this, SIGNAL(emitEntitySelected(int, int)));
     }
 
-    layout->addStretch(100);
-// void
-// addSpacerItem ( QSpacerItem * spacerItem )
-
-    setLayout(layout);
+    scrollAreaLayout->addStretch(100);
 }
 
-void GraphicalView::onDiskSelected (int diskIndex)
+void GraphicalView::onEntitySelected (int diskIndex, int volumeIndex)
 {
-    for (auto item: _items) {
-        item->onDiskSelected(diskIndex);
-    }
-}
-
-void GraphicalView::onVolumeSelected (int diskIndex, int volumeIndex)
-{
-    for (auto item: _items) {
-        item->onVolumeSelected(diskIndex, volumeIndex);
-    }
+    for (auto item: _items)
+        item->onEntitySelected(diskIndex, volumeIndex);
 }
 

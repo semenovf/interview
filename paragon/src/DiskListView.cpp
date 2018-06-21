@@ -68,19 +68,18 @@ QModelIndex DiskListView::getItemIndex (int diskIndex)
     return QModelIndex();
 }
 
-void DiskListView::onDiskSelected (int diskIndex)
+void DiskListView::onEntitySelected (int diskIndex, int volumeIndex)
 {
-    auto index = getItemIndex(diskIndex);
+    if (volumeIndex < 0) {
+        auto index = getItemIndex(diskIndex);
 
-    if (index.isValid()) {
-        setCurrentIndex(index);
+        if (index.isValid()) {
+            setCurrentIndex(index);
+        }
+    } else {
+        auto selectionModel = this->selectionModel();
+        selectionModel->clear();
     }
-}
-
-void DiskListView::onVolumeSelected(int, int)
-{
-    auto selectionModel = this->selectionModel();
-    selectionModel->clear();
 }
 
 void DiskListView::onSelected (QModelIndex const & index)
@@ -89,7 +88,7 @@ void DiskListView::onSelected (QModelIndex const & index)
         auto model = static_cast<ModelType *>(this->model());
         auto item = model->itemFromIndex(index);
         int diskIndex = item->data(DiskIndexRole).toInt();
-        emitDiskSelected(diskIndex);
+        emitEntitySelected(diskIndex, -1);
     }
 }
 

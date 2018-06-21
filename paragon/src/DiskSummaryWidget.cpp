@@ -50,23 +50,21 @@ void DiskSummaryWidget::setActive (bool value)
     updateFrame();
 }
 
-void DiskSummaryWidget::onDiskSelected (int diskIndex)
+void DiskSummaryWidget::onEntitySelected (int diskIndex, int volumeIndex)
 {
-    if (diskIndex == _diskModel->index())
-        setActive(true);
-    else
+    if (volumeIndex < 0) {
+        if (diskIndex == _diskModel->index())
+            setActive(true);
+        else
+            setActive(false);
+    } else {
         setActive(false);
+    }
 }
-
-// void DiskSummaryWidget::toggle ()
-// {
-//     _active = !_active;
-//     updateFrame();
-// }
 
 void DiskSummaryWidget::mousePressEvent (QMouseEvent * event)
 {
     setActive(true);
-    emitDiskSelected(_diskModel->index());
+    emitEntitySelected(_diskModel->index(), -1);
     event->accept();
 }
