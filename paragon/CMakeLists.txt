@@ -9,7 +9,14 @@ project(partman CXX)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-find_package(Qt4 REQUIRED QtGui QtXml)
+
+if (WIN32)
+    find_package(Qt5 REQUIRED Widgets Xml)
+else()
+    find_package(Qt4 REQUIRED QtGui QtXml)
+endif()
+
+
 
 set(SOURCES
     src/main.cpp
@@ -26,4 +33,10 @@ set(SOURCES
     src/VolumeSummaryWidget.cpp)
 
 add_executable(partman ${SOURCES})
-target_link_libraries(partman Qt4::QtGui Qt4::QtXml)
+
+if (WIN32)
+    target_link_libraries(partman Qt5::Widgets Qt5::Xml)
+else()
+    target_link_libraries(partman Qt4::QtGui Qt4::QtXml)
+endif()
+

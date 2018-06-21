@@ -1,0 +1,15 @@
+1. Download Precompiled Qt binaries (https://www.npcglib.org/~stathis/blog/precompiled-qt4-qt5/)
+2. Unzip archive.
+3. Read readme.txt file for instructions for how to create qt.conf (for Qt 4.8 version only).
+4. Run MSBuild command prompt, change working directory and run below command (replace path with actual). 
+5. cmake -G "Visual Studio 14 2015" -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=11 -DCMAKE_PREFIX_PATH="c:\qt4\qt4-4.8.7-vs2013\qt-x86-static" ..
+   cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=11 -DCMAKE_PREFIX_PATH="C:\qt5\qt5-5.7.1-vs2015\qt5-x64-shared-release" ..
+6. msbuild.exe SolutionFile.sln /t:Build/p:Configuration=Release;Platform=Win64
+
+If error occured while launch the application:
+
+-------------
+This application failed to start because it could not find or load the Qt platform plugin "windows" in "".
+-------------
+
+place plugin/platforms/qwindows.dll file into 'platform' subdirectory in application's directory.

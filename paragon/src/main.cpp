@@ -5,6 +5,8 @@
 
 int main (int argc, char * argv[])
 {
+    QCoreApplication::addLibraryPath("./");
+
     QApplication app(argc, argv);
     app.setOrganizationName("paragon-exam");
     app.setApplicationName("partman");
