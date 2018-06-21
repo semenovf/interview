@@ -14,7 +14,6 @@ GraphicalView::GraphicalView (Model * model, QWidget * parent)
     auto scrollAreaWidget = new QWidget;
     this->setWidgetResizable(true);
     this->setWidget(scrollAreaWidget);
-    //this->setBackgroundRole(QPalette::Dark);
 
     auto scrollAreaLayout = new QVBoxLayout;
     scrollAreaLayout->setContentsMargins(0,0,0,0);

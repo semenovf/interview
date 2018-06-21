@@ -1,5 +1,4 @@
 #include <QStringList>
-#include <QBrush>
 #include "Model.hpp"
 #include "VolumeListView.hpp"
 
@@ -52,7 +51,6 @@ VolumeListView::VolumeListView (Model * model, QWidget * parent)
             Qt::ItemFlags defaultFlags = Qt::NoItemFlags; //Qt::ItemIsEnabled;
 
             nameItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-
             nameItem->setData(i, DiskIndexRole);
             nameItem->setData(j, VolumeIndexRole);
 
@@ -65,9 +63,6 @@ VolumeListView::VolumeListView (Model * model, QWidget * parent)
             freeRatioItem->setFlags(defaultFlags);
             faultItem->setFlags(defaultFlags);
             overheadItem->setFlags(defaultFlags);
-
-//             QBrush brush = nameItem->foreground();
-//             layoutItem->setForeground(brush);
 
             QList<QStandardItem *> items;
             items.append(nameItem);
@@ -123,11 +118,13 @@ void VolumeListView::onEntitySelected (int diskIndex, int volumeIndex)
 
 void VolumeListView::onSelected (QModelIndex const & index)
 {
-    if (index.isValid()) {
+    if (index.isValid() && index.column() == 0) {
         auto model = static_cast<ModelType *>(this->model());
         auto item = model->itemFromIndex(index);
         int diskIndex = item->data(DiskIndexRole).toInt();
         int volumeIndex = item->data(VolumeIndexRole).toInt();
+
+        qDebug() << "VolumeListView::onSelected: " << volumeIndex;
         emitEntitySelected(diskIndex, volumeIndex);
     }
 }

@@ -20,7 +20,8 @@ set(SOURCES
     src/MainWindow.cpp
     src/Model.cpp
     src/TableView.cpp
-    src/TestModel.cpp
+#    src/TestModel.cpp
+    src/TestXmlModel.cpp
     src/VolumeListView.cpp
     src/VolumeSummaryWidget.cpp)
 

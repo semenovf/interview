@@ -2,6 +2,7 @@
 #include <QTableView>
 #include <QStandardItemModel>
 #include <QStandardItem>
+#include <QColor>
 
 QT_BEGIN_NAMESPACE
 class QStringList;

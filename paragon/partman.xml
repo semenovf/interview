@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <disks>
-    <disk name="Disk 0">
-        <volume name="Volume 0" />
-        <volume name="Volume 1" />
-        <volume name="Volume 2" />
+    <disk name="Disk 0" capacity="1000" type="Basic" status="Online">
+        <volume name="C:" capacity="400" free="150" layout="Simple" type="Basic" file-system="NTFS" status="Healthy" fault-tolerance="yes" overhead="0" />
+        <volume name="D:" capacity="200" free="100" layout="Simple" type="Basic" file-system="NTFS" status="Healthy" fault-tolerance="yes" overhead="0" />
+        <volume name="E:" capacity="400" free="400" layout="Simple" type="Basic" file-system="NTFS" status="Healthy" fault-tolerance="yes" overhead="0" />
     </disk>
 
-    <disk name="Disk 1">
-        <volume name="Volume 0" />
-        <volume name="Volume 1" />
-        <volume name="Volume 2" />
+    <disk name="CD-ROM 0" capacity="600" type="Basic" status="Online">
+        <volume name="O:" capacity="650" free="650" layout="Simple" type="Basic" file-system="NTFS" status="Healthy" fault-tolerance="yes" overhead="0" />
     </disk>
 
-    <disk name="Disk 2">
-        <volume name="Volume 0" />
-        <volume name="Volume 1" />
-        <volume name="Volume 2" />
+    <disk name="Disk 1" capacity="500" type="Basic" status="Online">
+        <volume name="F:" capacity="100" free="100" layout="Simple" type="Basic" file-system="NTFS" status="Healthy" fault-tolerance="yes" overhead="0" />
+        <volume name="G:" capacity="400" free="250" layout="Simple" type="Basic" file-system="NTFS" status="Healthy" fault-tolerance="yes" overhead="0" />
     </disk>
 </disks>

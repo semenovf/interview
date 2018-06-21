@@ -49,6 +49,7 @@ enum struct DiskStatusEnum
 
 struct Capacity
 {
+    using type = quint64;
     quint64 value;
     Capacity (quint64 v) : value(v) {}
 };

@@ -84,7 +84,7 @@ void DiskListView::onEntitySelected (int diskIndex, int volumeIndex)
 
 void DiskListView::onSelected (QModelIndex const & index)
 {
-    if (index.isValid()) {
+    if (index.isValid() && index.column() == 0) {
         auto model = static_cast<ModelType *>(this->model());
         auto item = model->itemFromIndex(index);
         int diskIndex = item->data(DiskIndexRole).toInt();

@@ -32,6 +32,8 @@ class MainWindow : public QMainWindow
     QAction * _viewBottomVolumeListAct;
     QAction * _viewBottomGraphicalViewAct;
     QAction * _viewBottomShowHideAct;
+    QAction * _aboutAct;
+    QAction * _aboutQtAct;
 
 public:
     MainWindow (Model * model);
@@ -48,6 +50,7 @@ private:
 
 private:
     Q_SLOT void onExit ();
+    Q_SLOT void about ();
     Q_SLOT void setDiskListAtTop ();
     Q_SLOT void setVolumeListAtTop ();
     Q_SLOT void setGraphicalViewAtTop ();

@@ -7,6 +7,7 @@
 #include <QAction>
 #include <QMenu>
 #include <QMenuBar>
+#include <QMessageBox>
 #include "Model.hpp"
 #include "BottomWidget.hpp"
 #include "TopWidget.hpp"
@@ -19,6 +20,17 @@
 
 static QString const GEOMETRY_KEY("geometry");
 static QString const WINDOW_STATE_KEY("window-state");
+static QString const TOP_WIDGET_KEY("top-widget");
+static QString const BOTTOM_WIDGET_KEY("bottom-widget");
+static QString const BOTTOM_WIDGET_VISIBLE_KEY("bottom-widget-visible");
+static QString const DISK_LIST_VIEW_NAME("disk-list-view");
+static QString const VOLUME_LIST_VIEW_NAME("volume-list-view");
+static QString const GRAPHICAL_VIEW_NAME("graphical-view");
+
+static QString const ABOUT = QT_TR_NOOP(
+    "<center><b>Partition Manager</b></center>"
+    "<br/>"
+    "<center>Special for Paragon Software's Exam<center>");
 
 static void __deleteAllWidgetsFromLayout (QLayout * layout)
 {
@@ -44,25 +56,60 @@ MainWindow::MainWindow (Model * model)
     _bottomWidget->setLayout(new QVBoxLayout);
     _bottomWidget->layout()->setContentsMargins(10,0,10,10);
 
-//     auto topWidgetSA = new QScrollArea(this);
-//     auto bottomWidgetSA = new QScrollArea(this);
-//
-//     topWidgetSA->setWidget(_topWidget);
-//     bottomWidgetSA->setWidget(_bottomWidget);
-
     QSplitter * splitter = new QSplitter(Qt::Vertical, this);
     splitter->addWidget(_topWidget);
     splitter->addWidget(_bottomWidget);
 
     setCentralWidget(splitter);
 
-    setVolumeListAtTop();
-    setGraphicalViewAtBottom();
-
     initActions();
     initMenus();
     initStatusBar();
     restoreSettings();
+}
+
+void MainWindow::restoreSettings ()
+{
+    QSettings settings(qApp->organizationName(), qApp->applicationName());
+
+    this->restoreGeometry(settings.value(GEOMETRY_KEY).toByteArray());
+    this->restoreState(settings.value(WINDOW_STATE_KEY).toByteArray());
+
+    setWindowTitle(tr("Partition Manager (special for Paragon Software's Exam)"));
+
+    QString topWidgetName = settings.value(TOP_WIDGET_KEY).toString();
+    QString bottomWidgetName = settings.value(BOTTOM_WIDGET_KEY).toString();
+
+    if (topWidgetName == DISK_LIST_VIEW_NAME)
+        setDiskListAtTop();
+    else if (topWidgetName == GRAPHICAL_VIEW_NAME)
+        setGraphicalViewAtTop();
+    else
+        setVolumeListAtTop();
+
+    if (bottomWidgetName == DISK_LIST_VIEW_NAME)
+        setDiskListAtBottom();
+    else if (bottomWidgetName == VOLUME_LIST_VIEW_NAME)
+        setVolumeListAtBottom();
+    else
+        setGraphicalViewAtBottom();
+
+    if (settings.contains(BOTTOM_WIDGET_VISIBLE_KEY)) {
+        bool bottomWidgetIsVisible = settings.value(BOTTOM_WIDGET_VISIBLE_KEY).toBool();
+
+        if (!bottomWidgetIsVisible)
+            _bottomWidget->setVisible(false);
+    }
+}
+
+void MainWindow::saveSettings ()
+{
+    QSettings settings(qApp->organizationName(), qApp->applicationName());
+    settings.setValue(GEOMETRY_KEY, saveGeometry());
+    settings.setValue(WINDOW_STATE_KEY, saveState());
+    settings.setValue(TOP_WIDGET_KEY, _topWidget->objectName());
+    settings.setValue(BOTTOM_WIDGET_KEY, _bottomWidget->objectName());
+    settings.setValue(BOTTOM_WIDGET_VISIBLE_KEY, _bottomWidget->isVisible());
 }
 
 void MainWindow::closeEvent (QCloseEvent * event)
@@ -93,6 +140,12 @@ void MainWindow::initActions ()
 
     _exitAct->setShortcuts(QKeySequence::Quit);
     _exitAct->setStatusTip(tr("Exit from application"));
+
+    _aboutAct = new QAction(tr("About PartMan"), this);
+    connect(_aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+
+    _aboutQtAct = new QAction(tr("About &Qt"), this);
+    connect(_aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 }
 
 void MainWindow::initMenus ()
@@ -121,9 +174,14 @@ void MainWindow::initMenus ()
 
     menuBar()->addSeparator();
 
-//     _helpMenu = menuBar()->addMenu(tr("Help"));
-//     _helpMenu->addAction(_aboutAct);
-//     _helpMenu->addAction(_aboutQtAct);
+    _helpMenu = menuBar()->addMenu(tr("Help"));
+    _helpMenu->addAction(_aboutAct);
+    _helpMenu->addAction(_aboutQtAct);
+}
+
+void MainWindow::about ()
+{
+    QMessageBox::about(this, tr("About PartMan"), ABOUT);
 }
 
 void MainWindow::updateViewMenu ()
@@ -151,23 +209,6 @@ void MainWindow::setBottomWidget (QWidget * w)
     auto layout = qobject_cast<QVBoxLayout *>(_bottomWidget->layout());
     __deleteAllWidgetsFromLayout(layout);
     layout->addWidget(w);
-}
-
-void MainWindow::saveSettings ()
-{
-    QSettings settings(qApp->organizationName(), qApp->applicationName());
-    settings.setValue(GEOMETRY_KEY, saveGeometry());
-    settings.setValue(WINDOW_STATE_KEY, saveState());
-}
-
-void MainWindow::restoreSettings ()
-{
-    QSettings settings(qApp->organizationName(), qApp->applicationName());
-
-    this->restoreGeometry(settings.value(GEOMETRY_KEY).toByteArray());
-    this->restoreState(settings.value(WINDOW_STATE_KEY).toByteArray());
-
-    setWindowTitle(tr("Partition Manager (special for Paragon Software's Exam)"));
 }
 
 void MainWindow::onExit ()
@@ -209,36 +250,42 @@ void MainWindow::setDiskListAtTop ()
 {
     setTopWidget(createView<DiskListView>(_topWidget));
      emitEntitySelected(_currentDisk, _currentVolume);
+     _topWidget->setObjectName(DISK_LIST_VIEW_NAME);
 }
 
 void MainWindow::setDiskListAtBottom ()
 {
     setBottomWidget(createView<DiskListView>(_bottomWidget));
     emitEntitySelected(_currentDisk, _currentVolume);
+    _bottomWidget->setObjectName(DISK_LIST_VIEW_NAME);
 }
 
 void MainWindow::setVolumeListAtTop ()
 {
     setTopWidget(createView<VolumeListView>(_topWidget));
     emitEntitySelected(_currentDisk, _currentVolume);
+    _topWidget->setObjectName(VOLUME_LIST_VIEW_NAME);
 }
 
 void MainWindow::setVolumeListAtBottom ()
 {
     setBottomWidget(createView<VolumeListView>(_bottomWidget));
     emitEntitySelected(_currentDisk, _currentVolume);
+    _bottomWidget->setObjectName(VOLUME_LIST_VIEW_NAME);
 }
 
 void MainWindow::setGraphicalViewAtTop ()
 {
     setTopWidget(createView<GraphicalView>(_topWidget));
     emitEntitySelected(_currentDisk, _currentVolume);
+    _topWidget->setObjectName(GRAPHICAL_VIEW_NAME);
 }
 
 void MainWindow::setGraphicalViewAtBottom ()
 {
     setBottomWidget(createView<GraphicalView>(_bottomWidget));
     emitEntitySelected(_currentDisk, _currentVolume);
+    _bottomWidget->setObjectName(GRAPHICAL_VIEW_NAME);
 }
 
 void MainWindow::showHideBottom ()

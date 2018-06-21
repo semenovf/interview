@@ -86,21 +86,14 @@ static QString CapacityUnitAbbrStrings[] =
 
 QString toString (Capacity const & cap)
 {
-    // TODO
+    Capacity::type n = cap.value;
     int abbrCount = sizeof(CapacityUnitAbbrStrings) / sizeof(CapacityUnitAbbrStrings[0]);
     int abbrIndex = 0;
 
-    quint64 cur = cap.value;
-    quint64 prev = cur;
+    for (; abbrIndex < abbrCount - 1 && n >= 1000; abbrIndex++)
+        n /= 1000;
 
-    while (cur > 0 && --abbrCount) {
-        cur /= 1024;
-        abbrIndex++;
-    }
-
-    //return QString("%1 %2").arg(prev).arg(CapacityUnitAbbrStrings[abbrIndex]);
-    return QString("%1 %2").arg(cap.value).arg(CapacityUnitAbbrStrings[0]);
-
+    return QString("%1 %2").arg(n).arg(CapacityUnitAbbrStrings[abbrIndex]);
 }
 
 QString toString (bool value)
@@ -164,6 +157,14 @@ DiskStatusEnum fromString<DiskStatusEnum> (QString const & s)
     if (ls == QT_TR_NOOP("online"))  return DiskStatusEnum::Online;
     if (ls == QT_TR_NOOP("offline")) return DiskStatusEnum::Offline;
     return DiskStatusEnum::Unknown;
+}
+
+template <>
+bool fromString<bool> (QString const & s)
+{
+    QString ls = s.toLower();
+    if (ls == QT_TR_NOOP("yes") || ls == QT_TR_NOOP("true")) return true;
+    return false;
 }
 
 Capacity DiskModel::free () const
