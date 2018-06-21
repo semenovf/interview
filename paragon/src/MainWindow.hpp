@@ -15,6 +15,8 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     Model *        _model;
+    int            _currentDisk;
+    int            _currentVolume;
     TopWidget *    _topWidget;
     BottomWidget * _bottomWidget;
 
@@ -57,8 +59,13 @@ private:
 
     Q_SIGNAL void emitDiskSelected (int diskIndex);
     Q_SIGNAL void emitVolumeSelected (int diskIndex, int volumeIndex);
+    Q_SLOT void onDiskSelected (int diskIndex);
+    Q_SLOT void onVolumeSelected (int diskIndex, int volumeIndex);
 
 private:
     void setTopWidget (QWidget * w);
     void setBottomWidget (QWidget * w);
+
+    template <typename ViewType>
+    ViewType * createView (QWidget * parent);
 };

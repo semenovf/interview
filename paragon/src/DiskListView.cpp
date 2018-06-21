@@ -77,6 +77,12 @@ void DiskListView::onDiskSelected (int diskIndex)
     }
 }
 
+void DiskListView::onVolumeSelected(int, int)
+{
+    auto selectionModel = this->selectionModel();
+    selectionModel->clear();
+}
+
 void DiskListView::onSelected (QModelIndex const & index)
 {
     if (index.isValid()) {

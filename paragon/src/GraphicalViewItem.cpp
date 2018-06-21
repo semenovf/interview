@@ -4,43 +4,51 @@
 #include "GraphicalViewItem.hpp"
 
 GraphicalViewItem::GraphicalViewItem (DiskModel * diskModel
-            , Capacity const & maxCapacity
             , QWidget * parent)
     : QWidget(parent)
     , _diskModel(diskModel)
-    , _maxCapacity(maxCapacity)
 {
     auto layout = new QHBoxLayout;
     layout->setContentsMargins(0,0,0,0);
 
     _disk = new DiskSummaryWidget(_diskModel, this);
+    connect(_disk, SIGNAL(emitDiskSelected(int)), this, SIGNAL(emitDiskSelected(int)));
 
     layout->addWidget(_disk);
 
     auto count = _diskModel->volumeCount();
 
+    auto maxCapacity = _diskModel->parentModel->maxCapacity();
+    auto diskCapacity = _diskModel->capacity();
+    int tailStretch = 100;
+
     for (int i = 0; i < count; i++) {
-        auto volume = new VolumeSummaryWidget(_diskModel->volumeAt(i), this);
+        auto volumeModel = _diskModel->volumeAt(i);
+        auto volume = new VolumeSummaryWidget(volumeModel, this);
         _volumes.append(volume);
-        layout->addWidget(volume);
+
+        int stretch = (100 * volumeModel->capacity().value) / maxCapacity.value;
+        layout->addWidget(volume, stretch);
+        tailStretch -= stretch;
+
+        connect(volume, SIGNAL(emitVolumeSelected(int, int)), this, SIGNAL(emitVolumeSelected(int, int)));
     }
+
+    if (tailStretch > 0)
+        layout->addStretch(tailStretch);
 
     setLayout(layout);
 }
 
-void GraphicalViewItem::setActiveDisk (bool value)
+void GraphicalViewItem::onDiskSelected (int diskIndex)
 {
-    _disk->setActive(value);
+    _disk->onDiskSelected(diskIndex);
 }
 
-void GraphicalViewItem::setActiveVolume (int volumeIndex, bool value)
+void GraphicalViewItem::onVolumeSelected (int diskIndex, int volumeIndex)
 {
+    for (auto volume: _volumes) {
+        volume->onVolumeSelected(diskIndex, volumeIndex);
+    }
 }
 
-// void GraphicalViewItem::setActive (bool value)
-// {
-//     _pdisk->setActive(value);
-//
-//     for (auto volume: _volumes)
-//         volume->setActive(value);
-// }

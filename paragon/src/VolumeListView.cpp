@@ -3,6 +3,8 @@
 #include "Model.hpp"
 #include "VolumeListView.hpp"
 
+#include <QDebug>
+
 static int const DiskIndexRole = Qt::UserRole + 1;
 static int const VolumeIndexRole = Qt::UserRole + 2;
 
@@ -103,6 +105,12 @@ QModelIndex VolumeListView::getItemIndex (int diskIndex, int volumeIndex)
     }
 
     return QModelIndex();
+}
+
+void VolumeListView::onDiskSelected (int)
+{
+    auto selectionModel = this->selectionModel();
+    selectionModel->clear();
 }
 
 void VolumeListView::onVolumeSelected (int diskIndex, int volumeIndex)

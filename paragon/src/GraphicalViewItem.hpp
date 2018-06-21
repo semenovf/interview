@@ -10,17 +10,15 @@ class GraphicalViewItem : public QWidget
     Q_OBJECT
 
     DiskModel *                  _diskModel;
-    Capacity                     _maxCapacity;
     DiskSummaryWidget *          _disk;
     QList<VolumeSummaryWidget *> _volumes;
 
 public:
-    GraphicalViewItem (DiskModel * diskModel
-            , Capacity const & maxCapacity
-            , QWidget * parent = 0);
+    GraphicalViewItem (DiskModel * diskModel, QWidget * parent = 0);
 
-public:
-    Q_SLOT void setActiveDisk (bool);
-    Q_SLOT void setActiveVolume (int volumeIndex, bool);
+    Q_SIGNAL void emitDiskSelected (int diskIndex);
+    Q_SIGNAL void emitVolumeSelected (int diskIndex, int volumeIndex);
+    Q_SLOT void onDiskSelected (int diskIndex);
+    Q_SLOT void onVolumeSelected (int diskIndex, int volumeIndex);
 };
 

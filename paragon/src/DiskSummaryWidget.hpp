@@ -19,14 +19,15 @@ class DiskSummaryWidget : public QFrame
 public:
     DiskSummaryWidget (DiskModel * diskModel, QWidget * parent = 0);
 
-public:
-    Q_SLOT void setActive (bool);
-    Q_SLOT void toggle ();
+    Q_SIGNAL void emitDiskSelected (int diskIndex);
+    Q_SLOT void onDiskSelected (int diskIndex);
+    //Q_SLOT void toggle ();
 
 protected:
     virtual void mousePressEvent (QMouseEvent * event) override;
 
 private:
+    void setActive (bool);
     void updateFrame ();
 };
 

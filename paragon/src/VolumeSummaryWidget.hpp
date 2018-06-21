@@ -20,13 +20,14 @@ public:
     VolumeSummaryWidget (VolumeModel * volumeModel, QWidget * parent = 0);
 
 public:
-    Q_SLOT void setActive (bool);
-    Q_SLOT void toggle ();
+    Q_SIGNAL void emitVolumeSelected (int diskIndex, int volumeIndex);
+    Q_SLOT void onVolumeSelected (int diskIndex, int volumeIndex);
 
 protected:
     virtual void mousePressEvent (QMouseEvent * event) override;
 
 private:
+    void setActive (bool);
     void updateFrame ();
     void updateBackground ();
 };

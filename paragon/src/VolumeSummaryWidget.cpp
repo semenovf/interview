@@ -96,8 +96,7 @@ void VolumeSummaryWidget::updateBackground ()
         brush.setStyle(Qt::BDiagPattern);
     } else {
         color = Qt::white;
-        brush.setColor(Qt::black);
-        brush.setStyle(Qt::SolidPattern);
+        brush.setStyle(Qt::NoBrush);
     }
 
     palette.setColor(QPalette::Window, color);
@@ -113,15 +112,18 @@ void VolumeSummaryWidget::setActive (bool value)
     updateBackground();
 }
 
-void VolumeSummaryWidget::toggle ()
-{
-    _active = !_active;
-    updateFrame();
-    updateBackground();
-}
-
 void VolumeSummaryWidget::mousePressEvent (QMouseEvent * event)
 {
     setActive(true);
+    emitVolumeSelected(_volumeModel->diskIndex(), _volumeModel->index());
     event->accept();
+}
+
+void VolumeSummaryWidget::onVolumeSelected (int diskIndex, int volumeIndex)
+{
+    if (diskIndex == _volumeModel->diskIndex()
+            && volumeIndex == _volumeModel->index())
+        setActive(true);
+    else
+        setActive(false);
 }

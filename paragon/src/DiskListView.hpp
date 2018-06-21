@@ -14,6 +14,7 @@ public:
 
     Q_SIGNAL void emitDiskSelected (int);
     Q_SLOT void onDiskSelected (int);
+    Q_SLOT void onVolumeSelected (int diskIndex, int volumeIndex);
 
 private:
     Q_SLOT void onSelected (QModelIndex const &);
