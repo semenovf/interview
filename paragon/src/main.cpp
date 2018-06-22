@@ -1,5 +1,6 @@
 #include <QApplication>
-#include <QDebug>
+#include <QMessageBox>
+#include "Exception.hpp"
 #include "Model.hpp"
 #include "MainWindow.hpp"
 
@@ -11,17 +12,25 @@ int main (int argc, char * argv[])
     app.setOrganizationName("paragon-exam");
     app.setApplicationName("partman");
 
-    Model * model = requestModel();
+    QString errmsg("No errors");
+    Model * model = requestModel(& errmsg);
 
     if (!model) {
-        qWarning() << "ERROR: Failed to request model";
+        //qCritical() << errmsg;
+        QMessageBox::critical(0, QT_TR_NOOP("Error"), errmsg, QMessageBox::Ok);
         return -1;
     }
 
-    MainWindow mainWin(model);
-    mainWin.show();
+    int r = -1;
 
-    int r = app.exec();
+    try {
+        MainWindow mainWin(model);
+        mainWin.show();
+        int r = app.exec();
+    } catch (Exception const & ex) {
+        QMessageBox::critical(0, QT_TR_NOOP("Error"), ex.what(), QMessageBox::Ok);
+    }
+
     releaseModel(model);
     return r;
 }

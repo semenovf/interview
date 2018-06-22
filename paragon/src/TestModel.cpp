@@ -62,7 +62,7 @@ static TestDiskModel<2, 500> diskModel2(2, "Disk 1", & model);
 static TestVolumeModel<100, 100> volumeModel2_0(0, "F:", & diskModel2);
 static TestVolumeModel<400, 250> volumeModel2_1(1, "G:", & diskModel2);
 
-Model * requestModel ()
+Model * requestModel (QString *)
 {
     diskModel0.volumes[0] = & volumeModel0_0;
     diskModel0.volumes[1] = & volumeModel0_1;

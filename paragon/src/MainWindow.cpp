@@ -16,8 +16,6 @@
 #include "GraphicalView.hpp"
 #include "MainWindow.hpp"
 
-#include <QDebug>
-
 static QString const GEOMETRY_KEY("geometry");
 static QString const WINDOW_STATE_KEY("window-state");
 static QString const TOP_WIDGET_KEY("top-widget");
@@ -100,6 +98,9 @@ void MainWindow::restoreSettings ()
         if (!bottomWidgetIsVisible)
             _bottomWidget->setVisible(false);
     }
+
+    if (!settings.contains(GEOMETRY_KEY))
+        resize(800, 600);
 }
 
 void MainWindow::saveSettings ()

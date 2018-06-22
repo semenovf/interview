@@ -2,9 +2,29 @@
 #include <QFile>
 #include <QList>
 #include <QDomDocument>
+#include "Exception.hpp"
 #include "Model.hpp"
 
-#include <QDebug>
+#define ASSERT_EXPECT_DISK_ATTR(attrName)                                      \
+        ASSERT_X(elem.hasAttribute(attrName)                                   \
+                , QString("Expected attribute `%1` for %2")                    \
+                    .arg(attrName).arg(diskIdStr(diskIndex)));
+
+#define ASSERT_EXPECT_VOLUME_ATTR(attrName)                                    \
+        ASSERT_X(elem.hasAttribute(attrName)                                   \
+                , QString("Expected attribute `%1` for %2")                    \
+                    .arg(attrName).arg(volumeIdStr(diskIndex(), volumeIndex)));
+
+inline QString diskIdStr (int diskIndex)
+{
+    return QString("disk[") + QString::number(diskIndex) + "]";
+}
+
+inline QString volumeIdStr (int diskIndex, int volumeIndex)
+{
+    return QString("disk[") + QString::number(diskIndex) + "]"
+            + ":volume[" + QString::number(volumeIndex) + "]";
+}
 
 struct TestVolumeModel : VolumeModel
 {
@@ -15,76 +35,79 @@ struct TestVolumeModel : VolumeModel
 
     virtual QString name () const override
     {
-        Q_ASSERT(elem.hasAttribute("name"));
+        ASSERT_EXPECT_VOLUME_ATTR("name");
         return elem.attribute("name");
     }
 
     virtual VolumeLayoutEnum layout () const override
     {
-        Q_ASSERT(elem.hasAttribute("layout"));
+        ASSERT_EXPECT_VOLUME_ATTR("layout");
         return fromString<VolumeLayoutEnum>(elem.attribute("layout"));
     }
 
     virtual VolumTypeEnum type () const override
     {
-        Q_ASSERT(elem.hasAttribute("type"));
+        ASSERT_EXPECT_VOLUME_ATTR("type");
         return fromString<VolumTypeEnum>(elem.attribute("type"));
     }
 
     virtual FileSystemEnum fileSystem () const override
     {
-        Q_ASSERT(elem.hasAttribute("file-system"));
+        ASSERT_EXPECT_VOLUME_ATTR("file-system");
         return fromString<FileSystemEnum>(elem.attribute("file-system"));
     }
 
     virtual VolumeStatusEnum status () const override
     {
-        Q_ASSERT(elem.hasAttribute("status"));
+        ASSERT_EXPECT_VOLUME_ATTR("status");
         return fromString<VolumeStatusEnum>(elem.attribute("status"));
     }
 
     virtual Capacity capacity () const override
     {
-        Q_ASSERT(elem.hasAttribute("capacity"));
+        ASSERT_EXPECT_VOLUME_ATTR("capacity");
 
         QString capacityStr = elem.attribute("capacity");
         bool ok;
         qulonglong n = capacityStr.toULongLong(& ok);
 
-        Q_ASSERT(ok);
+        ASSERT_X(ok, QString("Bad `capacity` for ") + volumeIdStr(diskIndex(), volumeIndex));
 
         return Capacity(n);
     }
 
     virtual Capacity free () const override
     {
-        Q_ASSERT(elem.hasAttribute("free"));
+        ASSERT_EXPECT_VOLUME_ATTR("free");
 
         QString capacityStr = elem.attribute("free");
         bool ok;
         qulonglong n = capacityStr.toULongLong(& ok);
 
-        Q_ASSERT(ok);
+        ASSERT_X(ok, QString("Bad `free` capacity for ") + volumeIdStr(diskIndex(), volumeIndex));
 
         return Capacity(n);
     }
 
     virtual bool faultTolerance () const override
     {
-        Q_ASSERT(elem.hasAttribute("fault-tolerance"));
+        ASSERT_EXPECT_VOLUME_ATTR("fault-tolerance");
         return fromString<bool>(elem.attribute("fault-tolerance"));
     }
 
     virtual int overhead () const override
     {
-        Q_ASSERT(elem.hasAttribute("overhead"));
+        ASSERT_EXPECT_VOLUME_ATTR("overhead");
 
         QString overheadStr = elem.attribute("overhead");
         bool ok;
         int n = overheadStr.toInt(& ok);
 
-        Q_ASSERT(ok);
-        Q_ASSERT(n >= 0 && n <= 100);
+        ASSERT_X(ok, QString("Bad `overhead` for ")
+                + volumeIdStr(diskIndex(), volumeIndex));
+        ASSERT_X(n >= 0 && n <= 100
+                , QString("`overhead` is out of range [0,100] for ")
+                        + volumeIdStr(diskIndex(), volumeIndex));
 
         return n;
     }
@@ -122,38 +145,39 @@ struct TestDiskModel : DiskModel
 
     virtual VolumeModel * volumeAt (int index) const override
     {
-        Q_ASSERT(index >= 0 && index < volumes.size());
+        ASSERT_X(index >= 0 && index < volumes.size()
+                , QString("Out of range volume request for ") + diskIdStr(diskIndex));
         return volumes[index];
     }
 
     virtual QString name () const override
     {
-        Q_ASSERT(elem.hasAttribute("name"));
+        ASSERT_EXPECT_DISK_ATTR("name");
         return elem.attribute("name");
     }
 
     virtual DiskTypeEnum type () const override
     {
-        Q_ASSERT(elem.hasAttribute("type"));
+        ASSERT_EXPECT_DISK_ATTR("type");
         return fromString<DiskTypeEnum>(elem.attribute("type"));
     }
 
     virtual Capacity capacity () const override
     {
-        Q_ASSERT(elem.hasAttribute("capacity"));
+        ASSERT_EXPECT_DISK_ATTR("capacity");
 
         QString capacityStr = elem.attribute("capacity");
         bool ok;
         qulonglong n = capacityStr.toULongLong(& ok);
 
-        Q_ASSERT(ok);
+        ASSERT_X(ok, QString("Bad `capacity` for ") + diskIdStr(diskIndex));
 
         return Capacity(n);
     }
 
     virtual DiskStatusEnum status () const override
     {
-        Q_ASSERT(elem.hasAttribute("status"));
+        ASSERT_EXPECT_DISK_ATTR("status");
         return fromString<DiskStatusEnum>(elem.attribute("status"));
     }
 };
@@ -187,12 +211,12 @@ struct TestModel : Model
 
     virtual DiskModel * diskAt (int index) const override
     {
-        Q_ASSERT(index >= 0 && index < disks.size());
+        ASSERT_X(index >= 0 && index < disks.size(), QString("Out of range disk request"));
         return disks[index];
     }
 };
 
-Model * requestModel ()
+Model * requestModel (QString * errmsg)
 {
     QString appName = qApp->applicationName();
     QString fileName = QString("./%1.xml").arg(appName);
@@ -208,10 +232,11 @@ Model * requestModel ()
     int errorColumn = 0;
 
     if (!doc.setContent(& file, & errorMsg, & errorLine, & errorColumn)) {
-        qWarning() << "ERROR: Failed to set content from XML: "
-                << errorMsg
-                << " at line " << errorLine
-                << " and column " << errorColumn;
+        if (errmsg) {
+            *errmsg = "Failed to set content from XML: "
+                + errorMsg
+                + " at line " + QString::number(errorLine);
+        }
         return nullptr;
     }
 

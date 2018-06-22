@@ -8,6 +8,7 @@ static QString FileSystemEnumStrings[] = {
     , QT_TR_NOOP("FAT16")
     , QT_TR_NOOP("FAT32")
     , QT_TR_NOOP("NTFS")
+    , QT_TR_NOOP("CDFS")
 };
 
 static QString VolumTypeEnumStrings[] = {
@@ -23,6 +24,7 @@ static QString VolumeLayoutEnumStrings[] = {
 static QString VolumeStatusEnumStrings[] = {
       QT_TR_NOOP("Unknown")
     , QT_TR_NOOP("Healthy")
+    , QT_TR_NOOP("Failed")
 };
 
 static QString DiskTypeEnumStrings[] = {
@@ -111,6 +113,7 @@ FileSystemEnum fromString<FileSystemEnum> (QString const & s)
     if (ls == QT_TR_NOOP("fat16")) return FileSystemEnum::FAT16;
     if (ls == QT_TR_NOOP("fat32")) return FileSystemEnum::FAT32;
     if (ls == QT_TR_NOOP("ntfs"))  return FileSystemEnum::NTFS;
+    if (ls == QT_TR_NOOP("cdfs"))  return FileSystemEnum::CDFS;
     return FileSystemEnum::Unknown;
 }
 
@@ -134,7 +137,8 @@ template <>
 VolumeStatusEnum fromString<VolumeStatusEnum> (QString const & s)
 {
     QString ls = s.toLower();
-    if (ls == QT_TR_NOOP("healthy"))  return VolumeStatusEnum::Healthy;
+    if (ls == QT_TR_NOOP("healthy")) return VolumeStatusEnum::Healthy;
+    if (ls == QT_TR_NOOP("failed"))  return VolumeStatusEnum::Failed;
     return VolumeStatusEnum::Unknown;
 }
 
@@ -174,7 +178,7 @@ Capacity DiskModel::free () const
 
     for (int i = 0; i < count; i++) {
         auto volumeModel = volumeAt(i);
-        result = Capacity(qMax(result.value, volumeModel->free().value));
+        result.value += volumeModel->free().value;
     }
     return result;
 }

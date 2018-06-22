@@ -5,8 +5,6 @@
 #include "GraphicalViewItem.hpp"
 #include "GraphicalView.hpp"
 
-#include <QDebug>
-
 GraphicalView::GraphicalView (Model * model, QWidget * parent)
     : QScrollArea(parent)
     , _model(model)

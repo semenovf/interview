@@ -2,8 +2,6 @@
 #include "Model.hpp"
 #include "VolumeListView.hpp"
 
-#include <QDebug>
-
 static int const DiskIndexRole = Qt::UserRole + 1;
 static int const VolumeIndexRole = Qt::UserRole + 2;
 
@@ -80,6 +78,8 @@ VolumeListView::VolumeListView (Model * model, QWidget * parent)
         }
     }
 
+    resizeColumnsToContents();
+
     connect(this, SIGNAL(activated(QModelIndex const &)), SLOT(onSelected(QModelIndex const &)));
     connect(this, SIGNAL(clicked(QModelIndex const &)), SLOT(onSelected(QModelIndex const &)));
 }
@@ -123,8 +123,6 @@ void VolumeListView::onSelected (QModelIndex const & index)
         auto item = model->itemFromIndex(index);
         int diskIndex = item->data(DiskIndexRole).toInt();
         int volumeIndex = item->data(VolumeIndexRole).toInt();
-
-        qDebug() << "VolumeListView::onSelected: " << volumeIndex;
         emitEntitySelected(diskIndex, volumeIndex);
     }
 }

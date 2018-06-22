@@ -6,12 +6,12 @@
         <volume name="E:" capacity="400" free="400" layout="Simple" type="Basic" file-system="NTFS" status="Healthy" fault-tolerance="yes" overhead="0" />
     </disk>
 
-    <disk name="CD-ROM 0" capacity="600" type="Basic" status="Online">
-        <volume name="O:" capacity="650" free="650" layout="Simple" type="Basic" file-system="NTFS" status="Healthy" fault-tolerance="yes" overhead="0" />
+    <disk name="CD-ROM 0" capacity="650" type="Basic" status="Online">
+        <volume name="O:" capacity="650" free="650" layout="Simple" type="Basic" file-system="CDFS" status="Healthy" fault-tolerance="yes" overhead="10" />
     </disk>
 
     <disk name="Disk 1" capacity="500" type="Basic" status="Online">
-        <volume name="F:" capacity="100" free="100" layout="Simple" type="Basic" file-system="NTFS" status="Healthy" fault-tolerance="yes" overhead="0" />
-        <volume name="G:" capacity="400" free="250" layout="Simple" type="Basic" file-system="NTFS" status="Healthy" fault-tolerance="yes" overhead="0" />
+        <volume name="F:" capacity="100" free="100" layout="Simple" type="Basic" file-system="FAT32" status="Healthy" fault-tolerance="yes" overhead="0" />
+        <volume name="G:" capacity="400" free="250" layout="Simple" type="Basic" file-system="FAT16" status="Healthy" fault-tolerance="yes" overhead="0" />
     </disk>
 </disks>

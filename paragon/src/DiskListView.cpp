@@ -47,6 +47,8 @@ DiskListView::DiskListView (Model * model, QWidget * parent)
         viewModel->appendRow(items);
     }
 
+    resizeColumnsToContents();
+
     connect(this, SIGNAL(activated(QModelIndex const &)), SLOT(onSelected(QModelIndex const &)));
     connect(this, SIGNAL(clicked(QModelIndex const &)), SLOT(onSelected(QModelIndex const &)));
 }
