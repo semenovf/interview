@@ -8,22 +8,25 @@ template <typename T>
 class Queue
 {
 public:
-    void dequeue () 
+    void dequeue (int & sz)
     {
         QMutexLocker locker(& _m);
         _q.dequeue();
+        sz = _q.size();
     }
-    
-    void enqueue (T const & op)
+
+    void enqueue (T const & op, int & sz)
     {
-         QMutexLocker locker(& _m);
-         _q.enqueue(op);
+        QMutexLocker locker(& _m);
+        _q.enqueue(op);
+        sz = _q.size();
     }
-    
-    T head () const
+
+    T head (int & sz) const
     {
         QMutexLocker locker(& _m);
         T r = _q.head();
+        sz = _q.size();
         return r;
     }
 

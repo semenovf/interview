@@ -10,10 +10,14 @@ find_package(Qt5 REQUIRED Widgets)
 #find_package(Qt4 REQUIRED QtGui)
 
 set(EXE_SOURCES
-    src/main.cpp
-    src/MainWindow.cpp
-    src/Calculator.cpp)
+    main.cpp
+    MainWindow.cpp
+    Console.cpp
+    Operation.cpp
+    Worker.cpp
+    DoIt.cpp)
 
+include_directories(${CMAKE_CURRENT_LIST_DIR})
 add_executable(${EXE_TARGET} ${EXE_SOURCES})
 
 target_link_libraries(${EXE_TARGET} Qt5::Widgets)
