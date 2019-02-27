@@ -6,11 +6,6 @@
 #include "Worker.hpp"
 #include "Operation.hpp"
 
-// QT_BEGIN_NAMESPACE
-// class QCloseEvent;
-// class QKeyEvent;
-// QT_END_NAMESPACE
-
 namespace Ui {
     class CalculatorForm;
 } // namespace Ui
@@ -50,19 +45,17 @@ private:
     void logResult (QString const & s);
     void logError (QString const & s);
 
-    Q_SLOT void showHideExtraArea (bool show);
     Q_SLOT void processResult (Result const & res);
     Q_SIGNAL void requestCalculate (Operation const & op);
     Q_SIGNAL void setTimeout (int t);
 
 private:
     Ui::CalculatorForm * _ui;
-    QSize                _mainAreaSize;
-    QButtonGroup         _buttonGroup;
-    State                _state = INITIAL;
-    Operator             _operator = Operator::UNKNOWN;
-    QString              _operandA;
-    QString              _operandB;
+    QButtonGroup _buttonGroup;
+    State        _state = INITIAL;
+    Operator     _operator = Operator::UNKNOWN;
+    QString      _operandA;
+    QString      _operandB;
 
     QThread      _operationThread;
     QThread      _controlThread;

@@ -12,11 +12,9 @@
 static QChar DEC_POINT{','};
 static QChar PLUS_SIGN{'+'};
 static QChar MINUS_SIGN{'-'};
-static QString const WINDOW_POSITION_KEY{"window-position"};
-static QString const MAIN_AREA_SIZE_KEY{"main-area-size"};
 static QString const GEOMETRY_KEY{"geometry"};
-static QString const WINDOW_STATE_KEY{"window-state"};
-static QString const EXTRA_AREA_VISIBLE_KEY{"extra-area-visible"};
+//static QString const WINDOW_STATE_KEY{"window-state"};
+static QString const SPLITTER_STATE_KEY{"splitter-state"};
 static QString const TIMEOUT_KEY{"timeout"};
 
 static int const DIGIT_BASE_ID    =   0;
@@ -70,7 +68,7 @@ MainWindow::MainWindow (DoItFunc doIt)
     , _ui{new Ui::CalculatorForm}
 {
     _ui->setupUi(this);
-    _ui->extraArea->hide();
+    //_ui->extraArea->hide();
 
     _buttonGroup.addButton(_ui->button0, DIGIT_BASE_ID + 0);
     _buttonGroup.addButton(_ui->button1, DIGIT_BASE_ID + 1);
@@ -97,12 +95,6 @@ MainWindow::MainWindow (DoItFunc doIt)
     connect(& _buttonGroup
             , static_cast<void(QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked)
             , [this] (int id) { this->process(id); });
-
-    connect(_ui->buttonMore
-            , & QPushButton::clicked
-            , [this] () { showHideExtraArea(!_ui->extraArea->isVisible()); });
-
-    layout()->setContentsMargins(0,0,0,0);
 
     auto operationWorker = new OperationWorker(
               doIt
@@ -191,18 +183,14 @@ void MainWindow::restoreSettings ()
     QSettings settings(qApp->organizationName(), qApp->applicationName());
 
     this->restoreGeometry(settings.value(GEOMETRY_KEY).toByteArray());
-    QVariant windowPosition = settings.value(WINDOW_POSITION_KEY, QPoint{0,0});
-    QVariant mainAreaSize   = settings.value(MAIN_AREA_SIZE_KEY, QSize{640, 480});
-    QVariant showExtraArea  = settings.value(EXTRA_AREA_VISIBLE_KEY, false);
+    _ui->splitter->restoreState(settings.value(SPLITTER_STATE_KEY).toByteArray());
     QVariant timeoutValue   = settings.value(TIMEOUT_KEY, QString{"0"});
 
-    this->move(windowPosition.toPoint());
-    _ui->mainArea->resize(mainAreaSize.toSize());
-    _ui->extraArea->resize(QSize{mainAreaSize.toSize().width(), 100});
     _ui->timeoutEdit->setText(timeoutValue.toString());
     emit setTimeout(timeoutValue.toInt());
-    //showHideExtraArea(showExtraArea.toBool());
-    showHideExtraArea(true);
+    
+    _ui->splitter->setCollapsible(_ui->splitter->indexOf(_ui->mainArea), false);
+    _ui->splitter->setCollapsible(_ui->splitter->indexOf(_ui->extraArea), true);
 }
 
 void MainWindow::saveSettings ()
@@ -210,9 +198,7 @@ void MainWindow::saveSettings ()
     QSettings settings(qApp->organizationName(), qApp->applicationName());
 
     settings.setValue(GEOMETRY_KEY, saveGeometry());
-    settings.setValue(WINDOW_POSITION_KEY, this->pos());
-    settings.setValue(MAIN_AREA_SIZE_KEY, _ui->mainArea->size());
-    settings.setValue(EXTRA_AREA_VISIBLE_KEY, _ui->extraArea->isVisible());
+    settings.setValue(SPLITTER_STATE_KEY, _ui->splitter->saveState());
     settings.setValue(TIMEOUT_KEY, _ui->timeoutEdit->text());
 }
 
@@ -277,40 +263,16 @@ void MainWindow::keyReleaseEvent (QKeyEvent * event)
 
 void MainWindow::resizeEvent (QResizeEvent * event)
 {
-    QWidget::resizeEvent(event);
-    //_mainAreaSize = _ui->mainArea->size();
-    _ui->extraArea->resize(
-          _ui->mainArea->size().width()
-        , _ui->extraArea->height());
-    qDebug() << "================";
-    qDebug() << "Window Size:" << this->size();
-    qDebug() << "Main Area Size:" << _ui->mainArea->size();
-    qDebug() << "Extra Area Size:" << _ui->extraArea->size();
-}
-
-void MainWindow::showHideExtraArea (bool show)
-{
-    if (show) {
-        _mainAreaSize = _ui->mainArea->size();
-        //this->setGeometry(this->geometry() + QMargins{0,0,0,100});
-        _ui->extraArea->show();
-        _ui->buttonMore->setText("less...");
-        this->resize(QSize{_mainAreaSize.width()
-                , _mainAreaSize.height() + _ui->extraArea->height()});
-    } else {
-        this->resize(_mainAreaSize);
-        _ui->extraArea->hide();
-        _ui->buttonMore->setText("more...");
-        //this->resize(_mainAreaSize);
-        _ui->mainArea->resize(_mainAreaSize);
-        //this->resize(this->size() - QSize(0, _ui->extraArea->height()));
-    }
-
-//     _ui->mainArea->resize(_mainAreaSize);
-//     _ui->mainArea->update();
-    qDebug() << "+++++++";
-    qDebug() << "New size:" << this->size();
-    qDebug() << "_mainAreaSize:" << _mainAreaSize;
+//     if (!_ui->extraArea->isVisible()) {
+//         _mainAreaSize = _ui->mainArea->size();
+//         this->resize(_mainAreaSize);
+//     }
+//     
+//     qDebug() << "================";
+//     qDebug() << "Window Size    :" << this->size();
+//     qDebug() << "Main Area Size :" << _ui->mainArea->size();
+//     qDebug() << "MainAreaSize   :" << _mainAreaSize;
+//     qDebug() << "Extra Area Size:" << _ui->extraArea->size();
 }
 
 inline void MainWindow::clearText ()
