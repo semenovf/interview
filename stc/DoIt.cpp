@@ -1,24 +1,29 @@
-#include "Operation.hpp"
 #include "ErrorCode.hpp"
 
+extern "C" {
 double DoIt (int typeWork
         , double operandA
         , double operandB
         , int & errorCode)
 {
-    double result = 0;
+    double result = double{0};
+
     switch (typeWork) {
-        case static_cast<int>(Operator::PLUS):
+        case 1: // PLUS
             result = operandA + operandB;
             break;
-        case static_cast<int>(Operator::MINUS):
+        case 2: // MINUS
             result = operandA - operandB;
             break;
-        case static_cast<int>(Operator::MULTIPLY):
+        case 3: // MULTIPLY
             result = operandA * operandB;
             break;
-        case static_cast<int>(Operator::DIVIDE):
-            result = operandA / operandB;
+        case 4: // DIVIDE
+            if (operandB == double{0}) {
+                errorCode = DIVIDE_BY_ZERO;
+            } else {
+                result = operandA / operandB;
+            }
             break;
         default:
             errorCode = BAD_OPERATOR_ERROR;
@@ -27,3 +32,5 @@ double DoIt (int typeWork
 
     return result;
 }
+
+} // extern "C"

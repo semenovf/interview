@@ -2,6 +2,11 @@
 #include <QString>
 #include "Result.hpp"
 
+using DoItFunc = double (*) (int TypeWork
+        , double OperandA
+        , double OperandB
+        , int & ErrorCode);
+
 enum class Operator {
       UNKNOWN
     , PLUS
@@ -32,8 +37,8 @@ public:
     ~Operation () = default;
 
     Operator getOperator () const { return _op; }
-    double getOperandA () const () { return _op1; }
-    double getOperandB () const () { return _op2; }
+    double getOperandA () const   { return _op1; }
+    double getOperandB () const   { return _op2; }
 
 private:
     Operator _op;

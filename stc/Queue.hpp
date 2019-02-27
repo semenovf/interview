@@ -25,12 +25,13 @@ public:
     T head (int & sz) const
     {
         QMutexLocker locker(& _m);
-        T r = _q.head();
         sz = _q.size();
-        return r;
+        return sz
+            ? _q.head()
+            : T{};
     }
 
 private:
-    QMutex    _m;
+    mutable QMutex _m;
     QQueue<T> _q;
 };

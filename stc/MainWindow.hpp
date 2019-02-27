@@ -2,12 +2,14 @@
 #include <QMainWindow>
 #include <QButtonGroup>
 #include <QThread>
+#include <QColor>
 #include "Worker.hpp"
 #include "Operation.hpp"
 
-QT_BEGIN_NAMESPACE
-class QCloseEvent;
-QT_END_NAMESPACE
+// QT_BEGIN_NAMESPACE
+// class QCloseEvent;
+// class QKeyEvent;
+// QT_END_NAMESPACE
 
 namespace Ui {
     class CalculatorForm;
@@ -25,37 +27,38 @@ class MainWindow : public QWidget
     };
 
 public:
-    MainWindow ();
+    MainWindow (DoItFunc doIt);
     ~MainWindow ();
 
 protected:
     virtual void closeEvent (QCloseEvent *) override;
+    virtual void keyReleaseEvent (QKeyEvent *) override;
+    virtual void resizeEvent (QResizeEvent *) override;
 
 private:
     void saveSettings ();
     void restoreSettings ();
 
-//     Q_SLOT void onButtonClicked (int id);
-//     Q_SLOT void onMoreClicked ();
-//     Q_SLOT void onRequestQueueSize (int sz);
-//     Q_SLOT void onResultQueueSize (int sz);
-    Q_SIGNAL void requestCalculate (Operation op);
-
     void process (int id);
-    void showHideExtraArea (bool show);
     void clearText ();
     void transformText (QString (* transformFunc) (QString const &));
     void transformText (QString (* transformFunc) (QString const &, QString const &)
             , QString const &);
 
+    void logColored (QString const & s, QColor const & fgColor);
     void logRequest (QString const & s);
     void logResult (QString const & s);
     void logError (QString const & s);
 
+    Q_SLOT void showHideExtraArea (bool show);
+    Q_SLOT void processResult (Result const & res);
+    Q_SIGNAL void requestCalculate (Operation const & op);
+    Q_SIGNAL void setTimeout (int t);
+
 private:
     Ui::CalculatorForm * _ui;
+    QSize                _mainAreaSize;
     QButtonGroup         _buttonGroup;
-    bool                 _extraAreaVisible;
     State                _state = INITIAL;
     Operator             _operator = Operator::UNKNOWN;
     QString              _operandA;

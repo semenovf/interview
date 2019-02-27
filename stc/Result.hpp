@@ -1,4 +1,5 @@
 #pragma once
+#include <QString>
 
 class Result
 {
@@ -8,6 +9,7 @@ private:
     {}
 
 public:
+    Result () : _isError{true} {} // Need by Qt's Meta subsystem
     Result (Result const &) = default;
     Result (Result &&) = default;
     Result & operator = (Result const &) = default;
@@ -27,6 +29,12 @@ public:
         r._result.errorCode = errorCode;
         return r;
     }
+
+    bool isError () const { return _isError; }
+    double result () const { return _result.value; }
+    int error () const { return _result.errorCode; }
+
+    static QString toErrorString (int errorCode);
 
 private:
     bool _isError;

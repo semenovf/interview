@@ -1,19 +1,8 @@
 #include <QApplication>
 #include <QCloseEvent>
 #include <QSettings>
-// #include <QSplitter>
-// #include <QLayoutItem>
-//#include <QVBoxLayout>
-// #include <QAction>
-// #include <QMenu>
-// #include <QMenuBar>
-// #include <QMessageBox>
-// #include "Model.hpp"
-// #include "BottomWidget.hpp"
-// #include "TopWidget.hpp"
-// #include "DiskListView.hpp"
-// #include "VolumeListView.hpp"
-// #include "GraphicalView.hpp"
+#include <QTextCharFormat>
+#include <QIntValidator>
 #include "ui_CalculatorForm.h"
 #include "Operation.hpp"
 #include "MainWindow.hpp"
@@ -23,34 +12,18 @@
 static QChar DEC_POINT{','};
 static QChar PLUS_SIGN{'+'};
 static QChar MINUS_SIGN{'-'};
+static QString const WINDOW_POSITION_KEY{"window-position"};
+static QString const MAIN_AREA_SIZE_KEY{"main-area-size"};
 static QString const GEOMETRY_KEY{"geometry"};
 static QString const WINDOW_STATE_KEY{"window-state"};
 static QString const EXTRA_AREA_VISIBLE_KEY{"extra-area-visible"};
-// static QString const BOTTOM_WIDGET_KEY("bottom-widget");
-// static QString const BOTTOM_WIDGET_VISIBLE_KEY("bottom-widget-visible");
-// static QString const DISK_LIST_VIEW_NAME("disk-list-view");
-// static QString const VOLUME_LIST_VIEW_NAME("volume-list-view");
-// static QString const GRAPHICAL_VIEW_NAME("graphical-view");
+static QString const TIMEOUT_KEY{"timeout"};
 
-// static QString const ABOUT = QT_TR_NOOP(
-//     "<center><b>Partition Manager</b></center>"
-//     "<br/>"
-//     "<center>Special for Paragon Software's Exam<center>");
-
-// static void __deleteAllWidgetsFromLayout (QLayout * layout)
-// {
-//     QLayoutItem * child;
-//
-//     while ((child = layout->takeAt(0)) != 0) {
-//         child->widget()->deleteLater();
-//         delete child;
-//     }
-// }
 static int const DIGIT_BASE_ID    =   0;
 static int const OPERATOR_BASE_ID =  10;
 static int const BACKSPACE_ID     = 100;
 static int const CLEAR_ID         = 101;
-static int const DEC_POINT_ID     = 102;
+static int const DECPOINT_ID      = 102;
 static int const SIGN_ID          = 103;
 static int const EVAL_ID          = 104;
 
@@ -92,10 +65,9 @@ QString appendString (QString const & s, QString const & s1)
     return s + s1;
 }
 
-MainWindow::MainWindow ()
+MainWindow::MainWindow (DoItFunc doIt)
     : QWidget{0}
     , _ui{new Ui::CalculatorForm}
-    , _extraAreaVisible{false}
 {
     _ui->setupUi(this);
     _ui->extraArea->hide();
@@ -116,27 +88,24 @@ MainWindow::MainWindow ()
     _buttonGroup.addButton(_ui->buttonDiv  , OPERATOR_BASE_ID + static_cast<int>(Operator::DIVIDE));
     _buttonGroup.addButton(_ui->buttonBackspace, BACKSPACE_ID);
     _buttonGroup.addButton(_ui->buttonClear    , CLEAR_ID);
-    _buttonGroup.addButton(_ui->buttonDecPoint , DEC_POINT_ID);
+    _buttonGroup.addButton(_ui->buttonDecPoint , DECPOINT_ID);
     _buttonGroup.addButton(_ui->buttonSign     , SIGN_ID);
     _buttonGroup.addButton(_ui->buttonEval     , EVAL_ID);
+
+    _ui->timeoutEdit->setValidator(new QIntValidator(0, 99, this));
 
     connect(& _buttonGroup
             , static_cast<void(QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked)
             , [this] (int id) { this->process(id); });
-//             , this
-//             , & MainWindow::onButtonClicked);
 
     connect(_ui->buttonMore
             , & QPushButton::clicked
-            , [this] (int id) { showHideExtraArea(!_extraAreaVisible); });
-    //             , this
-//             , & MainWindow::onMoreClicked);
-
+            , [this] () { showHideExtraArea(!_ui->extraArea->isVisible()); });
 
     layout()->setContentsMargins(0,0,0,0);
 
     auto operationWorker = new OperationWorker(
-              DoIt
+              doIt
             , _requestQueue
             , _resultQueue);
 
@@ -152,24 +121,52 @@ MainWindow::MainWindow ()
     connect(& _controlThread, & QThread::finished
             , controlWorker, & QObject::deleteLater);
 
-    connect(this, & MainWindow::requestCalculate
-            , controlWorker, & ControlWorker::requested);
-
     connect(operationWorker, & OperationWorker::requestQueueSizeChanged
-            , [this] (int sz) { _ui->requestQueueSizeLabel->setText(QString::number(sz)); });
-            //, this, & MainWindow::onRequestQueueSize);
+            , [this] (int sz) {
+                _ui->requestQueueSizeLabel->setText(QString::number(sz));
+            });
 
     connect(controlWorker, & ControlWorker::requestQueueSizeChanged
-            , [this] (int sz) { _ui->requestQueueSizeLabel->setText(QString::number(sz)); });
-//            , this, & MainWindow::onRequestQueueSize);
+            , [this] (int sz) {
+                _ui->requestQueueSizeLabel->setText(QString::number(sz));
+            });
 
     connect(operationWorker, & OperationWorker::resultQueueSizeChanged
-            , [this] (int sz) { _ui->resultQueueSizeLabel->setText(QString::number(sz)); });
-//            , this, & MainWindow::onResultQueueSize);
+            , [this] (int sz) {
+                _ui->resultQueueSizeLabel->setText(QString::number(sz));
+            });
 
     connect(controlWorker, & ControlWorker::resultQueueSizeChanged
-            , [this] (int sz) { _ui->resultQueueSizeLabel->setText(QString::number(sz)); });
-//            , this, & MainWindow::onResultQueueSize);
+            , [this] (int sz) {
+                _ui->resultQueueSizeLabel->setText(QString::number(sz));
+            });
+
+    connect(this, & MainWindow::requestCalculate
+            , controlWorker, & ControlWorker::calculateRequested);
+
+    connect(controlWorker, & ControlWorker::resultQueueSizeChanged
+            , [this] (int sz) {
+                _ui->resultQueueSizeLabel->setText(QString::number(sz));
+            });
+
+    connect(controlWorker, & ControlWorker::requestReady
+            , operationWorker, & OperationWorker::calculate);
+
+    connect(operationWorker, & OperationWorker::resultReady
+            , controlWorker, & ControlWorker::processResult);
+
+    connect(controlWorker, & ControlWorker::resultReady
+            , this, & MainWindow::processResult);
+
+    connect(_ui->timeoutEdit, & QLineEdit::editingFinished
+            , [this] () {
+                int timeout = _ui->timeoutEdit->text().toInt();
+                qDebug() << "Set timeout" << timeout;
+                emit setTimeout(timeout);
+            });
+
+    connect(this, & MainWindow::setTimeout
+            , operationWorker, & OperationWorker::setTimeout);
 
     _operationThread.start();
     _controlThread.start();
@@ -194,37 +191,126 @@ void MainWindow::restoreSettings ()
     QSettings settings(qApp->organizationName(), qApp->applicationName());
 
     this->restoreGeometry(settings.value(GEOMETRY_KEY).toByteArray());
-    bool showExtraArea = settings.value(EXTRA_AREA_VISIBLE_KEY, false).toBool();
+    QVariant windowPosition = settings.value(WINDOW_POSITION_KEY, QPoint{0,0});
+    QVariant mainAreaSize   = settings.value(MAIN_AREA_SIZE_KEY, QSize{640, 480});
+    QVariant showExtraArea  = settings.value(EXTRA_AREA_VISIBLE_KEY, false);
+    QVariant timeoutValue   = settings.value(TIMEOUT_KEY, QString{"0"});
 
-    showHideExtraArea(showExtraArea);
-
-    if (!settings.contains(GEOMETRY_KEY))
-        resize(800, 600);
+    this->move(windowPosition.toPoint());
+    _ui->mainArea->resize(mainAreaSize.toSize());
+    _ui->extraArea->resize(QSize{mainAreaSize.toSize().width(), 100});
+    _ui->timeoutEdit->setText(timeoutValue.toString());
+    emit setTimeout(timeoutValue.toInt());
+    //showHideExtraArea(showExtraArea.toBool());
+    showHideExtraArea(true);
 }
 
 void MainWindow::saveSettings ()
 {
     QSettings settings(qApp->organizationName(), qApp->applicationName());
+
     settings.setValue(GEOMETRY_KEY, saveGeometry());
-    settings.setValue(EXTRA_AREA_VISIBLE_KEY, _extraAreaVisible);
+    settings.setValue(WINDOW_POSITION_KEY, this->pos());
+    settings.setValue(MAIN_AREA_SIZE_KEY, _ui->mainArea->size());
+    settings.setValue(EXTRA_AREA_VISIBLE_KEY, _ui->extraArea->isVisible());
+    settings.setValue(TIMEOUT_KEY, _ui->timeoutEdit->text());
 }
 
 void MainWindow::closeEvent (QCloseEvent * event)
 {
     saveSettings();
     event->accept();
+    _operationThread.quit();
+    _controlThread.quit();
+}
+
+void MainWindow::keyReleaseEvent (QKeyEvent * event)
+{
+    switch (event->key()) {
+        case Qt::Key_0: process(DIGIT_BASE_ID + 0); break;
+        case Qt::Key_1: process(DIGIT_BASE_ID + 1); break;
+        case Qt::Key_2: process(DIGIT_BASE_ID + 2); break;
+        case Qt::Key_3: process(DIGIT_BASE_ID + 3); break;
+        case Qt::Key_4: process(DIGIT_BASE_ID + 4); break;
+        case Qt::Key_5: process(DIGIT_BASE_ID + 5); break;
+        case Qt::Key_6: process(DIGIT_BASE_ID + 6); break;
+        case Qt::Key_7: process(DIGIT_BASE_ID + 7); break;
+        case Qt::Key_8: process(DIGIT_BASE_ID + 8); break;
+        case Qt::Key_9: process(DIGIT_BASE_ID + 9); break;
+
+        case Qt::Key_Comma:
+        case Qt::Key_Period:
+            process(DECPOINT_ID);
+            break;
+
+        case Qt::Key_Backspace:
+            process(BACKSPACE_ID);
+            break;
+
+        case Qt::Key_Plus:
+            process(OPERATOR_BASE_ID + static_cast<int>(Operator::PLUS));
+            break;
+
+        case Qt::Key_Minus:
+            process(OPERATOR_BASE_ID + static_cast<int>(Operator::MINUS));
+            break;
+
+        case Qt::Key_Asterisk:
+            process(OPERATOR_BASE_ID + static_cast<int>(Operator::MULTIPLY));
+            break;
+
+        case Qt::Key_Slash:
+            process(OPERATOR_BASE_ID + static_cast<int>(Operator::DIVIDE));
+            break;
+
+        case Qt::Key_Return:
+        case Qt::Key_Enter:
+        case Qt::Key_Equal:
+            process(EVAL_ID);
+            break;
+
+        default:
+            //qDebug() << "Key" << event->key();
+            QWidget::keyReleaseEvent(event);
+    }
+}
+
+void MainWindow::resizeEvent (QResizeEvent * event)
+{
+    QWidget::resizeEvent(event);
+    //_mainAreaSize = _ui->mainArea->size();
+    _ui->extraArea->resize(
+          _ui->mainArea->size().width()
+        , _ui->extraArea->height());
+    qDebug() << "================";
+    qDebug() << "Window Size:" << this->size();
+    qDebug() << "Main Area Size:" << _ui->mainArea->size();
+    qDebug() << "Extra Area Size:" << _ui->extraArea->size();
 }
 
 void MainWindow::showHideExtraArea (bool show)
 {
     if (show) {
+        _mainAreaSize = _ui->mainArea->size();
+        //this->setGeometry(this->geometry() + QMargins{0,0,0,100});
         _ui->extraArea->show();
         _ui->buttonMore->setText("less...");
+        this->resize(QSize{_mainAreaSize.width()
+                , _mainAreaSize.height() + _ui->extraArea->height()});
     } else {
+        this->resize(_mainAreaSize);
         _ui->extraArea->hide();
         _ui->buttonMore->setText("more...");
+        //this->resize(_mainAreaSize);
+        _ui->mainArea->resize(_mainAreaSize);
+        //this->resize(this->size() - QSize(0, _ui->extraArea->height()));
     }
-    _extraAreaVisible = show;
+
+//     _ui->mainArea->resize(_mainAreaSize);
+//     _ui->mainArea->update();
+    qDebug() << "+++++++";
+    qDebug() << "New size:" << this->size();
+    qDebug() << "_mainAreaSize:" << _mainAreaSize;
 }
 
 inline void MainWindow::clearText ()
@@ -272,7 +358,7 @@ void MainWindow::process (int id)
 
             break;
 
-        case DEC_POINT_ID:
+        case DECPOINT_ID:
             if (_state == OPERAND_A || _state == OPERAND_B)
                 transformText(appendDecPoint);
             break;
@@ -283,7 +369,7 @@ void MainWindow::process (int id)
             break;
 
         case BACKSPACE_ID:
-            if (_state == OPERAND_A || _state == OPERAND_B)
+            if (_state == INITIAL || _state == OPERAND_A || _state == OPERAND_B)
                 transformText(backspaced);
             break;
 
@@ -300,7 +386,7 @@ void MainWindow::process (int id)
 
         case CLEAR_ID:
             _ui->lineEdit->setText(QString{});
-            _state == INITIAL;
+            _state = INITIAL;
             break;
 
         case EVAL_ID:
@@ -338,37 +424,39 @@ void MainWindow::process (int id)
     }
 }
 
-// void MainWindow::onButtonClicked (int id)
-// {
-//     process(id);
-// }
+void MainWindow::processResult (Result const & res)
+{
+    if (res.isError()) {
+        logError(Result::toErrorString(res.error()));
+        _ui->lineEdit->setText("#error#");
+    } else {
+        QString resultString = QString::number(res.result());
+        resultString.replace(QChar('.'), DEC_POINT);
+        _ui->lineEdit->setText(resultString);
+        logResult(resultString);
+    }
+}
 
-// void MainWindow::onMoreClicked ()
-// {
-//     showHideExtraArea(!_extraAreaVisible);
-// }
-
-// void MainWindow::onRequestQueueSize (int sz)
-// {
-//     _ui->requestQueueSizeLabel->setText(QString::number(sz));
-// }
-
-// void MainWindow::onResultQueueSize (int sz)
-// {
-//     _ui->resultQueueSizeLabel->setText(QString::number(sz));
-// }
+void MainWindow::logColored (QString const & s, QColor const & fgColor)
+{
+    QTextCharFormat tf;
+    tf = _ui->console->currentCharFormat();
+    tf.setForeground(fgColor);
+    _ui->console->setCurrentCharFormat(tf);
+    _ui->console->appendPlainText(s);
+}
 
 void MainWindow::logRequest (QString const & s)
 {
-    _ui->console->appendPlainText(s);
+    logColored("Expression: " + s, Qt::darkGreen);
 }
 
 void MainWindow::logResult (QString const & s)
 {
-    _ui->console->appendPlainText(s);
+    logColored("Result: " + s, Qt::blue);
 }
 
 void MainWindow::logError (QString const & s)
 {
-    _ui->console->appendPlainText(s);
+    logColored("Error: " + s, Qt::red);
 }

@@ -4,11 +4,6 @@
 #include "Result.hpp"
 #include "Queue.hpp"
 
-extern double DoIt (int TypeWork
-        , double OperandA
-        , double OperandB
-        , int & ErrorCode);
-
 using RequestQueue = Queue<Operation>;
 using ResultQueue  = Queue<Result>;
 using DoItFunc = double (*) (int TypeWork
@@ -41,19 +36,21 @@ class OperationWorker : public AbstractWorker
     Q_OBJECT
 
 public:
-    OperationWorker (DoItFunc func
+    OperationWorker (DoItFunc doIt
             , RequestQueue & requestQueueRef
             , ResultQueue & resultQueueRef)
         : AbstractWorker(requestQueueRef, resultQueueRef)
-        , _func(func)
+        , _doIt(doIt)
+        , _timeout{0}
     {}
 
-protected:
-    Q_SLOT void calculate ();
-    Q_SIGNAL void resultReady (Result const &);
+    Q_SLOT   void calculate ();
+    Q_SLOT   void setTimeout (int t) { _timeout = t; }
+    Q_SIGNAL void resultReady ();
 
 private:
-    DoItFunc _func;
+    DoItFunc _doIt;
+    int      _timeout;
 };
 
 class ControlWorker : public AbstractWorker
@@ -66,7 +63,8 @@ public:
         : AbstractWorker(requestQueueRef, resultQueueRef)
     {}
 
-    Q_SLOT void requested (Operation const &);
-    Q_SLOT void onResultReady () {}
+    Q_SLOT void calculateRequested (Operation const &);
+    Q_SLOT void processResult ();
     Q_SIGNAL void requestReady ();
+    Q_SIGNAL void resultReady (Result const &);
 };

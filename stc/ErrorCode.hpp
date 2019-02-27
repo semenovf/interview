@@ -2,5 +2,6 @@
 
 enum ErrorCodeEnum {
       NO_ERROR
-    , BAD_OPERATOR_ERROR = 1
+    , DIVIDE_BY_ZERO
+    , BAD_OPERATOR_ERROR
 };
