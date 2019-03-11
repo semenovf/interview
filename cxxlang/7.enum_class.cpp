@@ -15,6 +15,5 @@ TEST_CASE("Enum class", "enum_class") {
     CHECK(std::underlying_type<Decimal>::type(Decimal::one) 
             + std::underlying_type<Decimal>::type(Decimal::two)
             == std::underlying_type<Decimal>::type(Decimal::three));
-    
 }
 

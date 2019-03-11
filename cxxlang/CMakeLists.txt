@@ -14,6 +14,14 @@ set(MY_TEST_TARGETS
     5.lambda
     6.decltype
     7.enum_class
+    8.smart_ptr
+    9.algo.1.nonmod
+    9.algo.2.mod
+    9.algo.3.del
+    9.algo.4.permut
+    9.algo.5.sort
+    9.algo.6.order
+    9.algo.7.num
 )
 
 # This is the "object library" target: compiles the sources only once
