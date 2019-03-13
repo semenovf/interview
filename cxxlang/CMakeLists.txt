@@ -6,7 +6,7 @@ include_directories(${CMAKE_SOURCE_DIR}/../pfs/tests)
 #
 # Add unit test targets
 #
-set(MY_TEST_TARGETS 
+set(MY_TEST_TARGETS
     1.initialization_list
     2.rvalue
     3.constexpr
@@ -22,6 +22,9 @@ set(MY_TEST_TARGETS
     9.algo.5.sort
     9.algo.6.order
     9.algo.7.num
+    sort.bubble
+    sort.selection
+    sort.insertion
 )
 
 # This is the "object library" target: compiles the sources only once
