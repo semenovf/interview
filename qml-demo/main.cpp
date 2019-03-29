@@ -64,7 +64,7 @@ class Translator
 {
 public:
     Translator () {}
-    ~Translator () { qDebug() << "~Translator";}
+    ~Translator () {}
 
     ResultStatus enable ()
     {
@@ -106,8 +106,7 @@ int main (int argc, char * argv[])
     ResultStatus rs = translator.enable();
 
     if (!rs) {
-        qWarning() << "ERROR:" << rs.what();
-        return -1;
+        qWarning() << "WARNING:" << rs.what();
     }
 
     QQmlApplicationEngine engine;
