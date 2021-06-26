@@ -1,10 +1,10 @@
 #include <utility>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QLocale>
-#include <QTranslator>
 #include <QFileInfo>
 #include <QDebug>
+#include "ResultStatus.hpp"
+#include "Translator.hpp"
 //#include <QQmlContext>
 
 //
@@ -19,87 +19,13 @@
 // Setting the UBUNTU_MENUPROXY environment variable to the empty string
 //
 
-template <typename CodeT>
-class ResultCode {};
-
-class ResultStatus
-{
-public:
-    ResultStatus ()
-        : _ok(true)
-    {}
-
-    ResultStatus (QString const & errstr)
-        : _ok(false)
-        , _errstr(errstr)
-    {}
-
-    ResultStatus (QString && errstr)
-        : _ok(false)
-        , _errstr(std::forward<QString>(errstr))
-    {}
-
-    ResultStatus (ResultStatus const &) = default;
-    ResultStatus (ResultStatus &&) = default;
-    ResultStatus & operator = (ResultStatus const &) = default;
-    ResultStatus & operator = (ResultStatus &&) = default;
-    ~ResultStatus () = default;
-
-    operator bool () const
-    {
-        return _ok;
-    }
-
-    QString const & what () const
-    {
-        return _errstr;
-    }
-
-private:
-    bool    _ok;
-    QString _errstr;
-};
-
-class Translator
-{
-public:
-    Translator () {}
-    ~Translator () {}
-
-    ResultStatus enable ()
-    {
-        QLocale currentLocale{};
-        QString basename{QCoreApplication::applicationName()};
-
-        bool success = _translator.load(currentLocale
-                , basename
-                , "."     // prefix
-                , "./"    // directory
-                , ".qm"); // suffix
-
-        if (!success)
-            return ResultStatus{QString{"failed to load translation for %1"}
-                    .arg(currentLocale.name())};
-
-        success = QCoreApplication::installTranslator(& _translator);
-
-        if (!success)
-            return ResultStatus{QString{"failed to install translator for %1"}
-                    .arg(currentLocale.name())};
-
-        return ResultStatus{};
-    }
-
-private:
-    QTranslator _translator;
-};
 
 int main (int argc, char * argv[])
 {
     QGuiApplication app(argc, argv);
     QString programName{QFileInfo{argv[0]}.baseName()};
 
-    app.setOrganizationName("stc-exam");
+    app.setOrganizationName("qml-demo");
     app.setApplicationName(programName);
 
     Translator translator{};
@@ -120,17 +46,7 @@ int main (int argc, char * argv[])
 
     QPM_INIT(engine);
     engine.load(QUrl{"qrc:///main.qml"});
-
-//     auto rootContext = engine.rootContext();
-//
-//     qDebug() << "rootContext=" << rootContext;
-//
-//     if (rootContext) {
-//         qDebug() << "rootContext->isValid()" << rootContext->isValid();
-//     }
-
-//     MainWindow mainWin(doIt);
-//     mainWin.show();
+    //engine.load(QUrl{"qrc:///Demo001.qml"});
 
     return app.exec();
 }

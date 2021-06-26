@@ -2,5 +2,14 @@
 <RCC version="1.0">
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>Calculator.qml</file>
+        <file>Demo000.qml</file>
+        <file>Demo001.qml</file>
+    </qresource>
+
+    <qresource prefix="/Demo001">
+        <file alias="background.png">rc/Demo001/background.png</file>
+        <file alias="pinwheel.png">rc/Demo001/pinwheel.png</file>
+        <file alias="pole.png">rc/Demo001/pole.png</file>
     </qresource>
 </RCC>

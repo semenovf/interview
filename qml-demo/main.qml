@@ -4,13 +4,12 @@ import QtQuick.Layouts 1.1
 import QtQuick.Window 2.2
 import Qt.labs.settings 1.0
 
-
 ApplicationWindow {
     id: appWindow
     visible: true
     width: 640
     height: 480
-    title: qsTr("Calculator")
+    title: qsTr("QML Demo")
 
     // Save and restore settings on open and close window respectivly
     Settings {
@@ -20,82 +19,87 @@ ApplicationWindow {
         property alias height: appWindow.height
     }
 
-    Rectangle {
-        anchors.fill: parent
-        color: "red"
-
-        GridLayout {
-            id: grid
-            columns: 5
-            anchors.margins: 10
-            anchors.fill: parent
-
-            TextField {
-                id: input
-                //TODO style: { background-color: white; }
-                verticalAlignment: TextInput.AlignVCenter
-                horizontalAlignment: TextInput.AlignRight
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                Layout.columnSpan: 5
-                cursorVisible: false
-            }
-
-            // First row
-            Button { text: "<-";  font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-            Button { text: "C";   font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-            Button { text: "+/-"; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-            Button { text: "=";   font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-
-            // Second row
-            Button { text: "7"; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-            Button { text: "8"; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-            Button { text: "9"; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-            Button { text: "/"; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-
-            // Third row
-            Button { text: "4"; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-            Button { text: "5"; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-            Button { text: "6"; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-            Button { text: "*"; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-
-            // Fourth row
-            Button { text: "1"; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-            Button { text: "2"; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-            Button { text: "3"; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-            Button { text: "-"; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-
-            // Fifth row
-            Button { text: "0"; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true; Layout.columnSpan: 2 }
-            Button { text: ","; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-            Button { text: "+"; font.bold: true; flat: false; Layout.fillHeight: true; Layout.fillWidth: true }
-
-    //         Text { text: "words"; color: "red" }
-    //         Text { text: "in"; font.underline: true }
-    //         Text { text: "a"; font.pixelSize: 20 }
-    //         Text { text: "row"; font.strikeout: true }
-        }
-    }
-
 //     Action {
 //         id: quitAction
 //         text: qsTr("Quit");
 //         shortcut: "Ctrl+Q"
 //         onTriggered: Qt.quit();
 //     }
-//
+
 //     menuBar: MenuBar {
 //         Menu {
 //             title: "File"
 //             MenuItem { action: quitAction }
 //         }
 //     }
-//
-//     ColumnLayout {
-//         id: appLayout
-//         spacing: 0
-//         anchors.fill: parent
-//
+
+    ColumnLayout {
+        id: appLayout
+        spacing: 0
+        anchors.fill: parent
+
+        Rectangle {
+            id: content
+            color: "green"
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            //anchors.fill: parent
+
+            Text {
+                id: contentText
+                color: "white"
+                anchors.centerIn: parent
+            }
+        }
+
+        Rectangle {
+            id: controls
+            color: "whitesmoke"
+//             Layout.fillHeight: true
+            Layout.fillWidth: true
+            Layout.maximumHeight: 50
+            Layout.minimumHeight: 50
+
+            RowLayout {
+                anchors.fill: parent
+                spacing: 0
+
+                Button {
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                    flat: true
+
+                    Text {
+                        text: "Previous"
+                        color: "black"
+                        anchors.centerIn: parent
+                    }
+
+                    onClicked: { contentText.text = "Prev" }
+                }
+
+                Rectangle {
+                    Layout.fillHeight: true
+                    width: 1
+                    color: "darkgrey"
+                }
+
+                Button {
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                    flat: true
+
+                    Text {
+                        text: "Next"
+                        color: "black"
+                        anchors.centerIn: parent
+                    }
+
+                    onClicked: { contentText.text = "Next" }
+                }
+            }
+        }
+
 //         Rectangle {
 //             id: redRec
 //             color: "red"
@@ -155,5 +159,6 @@ ApplicationWindow {
 //                     + Screen.desktopAvailableHeight + ")\n"
 //         anchors.horizontalCenter: appLayout.horizontalCenter
 //         anchors.verticalCenter: appLayout.verticalCenter
-//     }
+    }
 }
+
